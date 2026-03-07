@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUsuario
+from .models import CustomUsuario, HealthcareProfessional, Patients
 
 @admin.register(CustomUsuario)
 class CustomUsuarioAdmin(UserAdmin):
@@ -29,8 +29,19 @@ class CustomUsuarioAdmin(UserAdmin):
         }),
     )
 
-    # Impede que o campo de data seja editado manualmente (já que tem auto_now_add)
-    readonly_fields = ('date_joined', 'update_at')
-
     # Campo de busca
     search_fields = ('email', 'full_name')
+
+
+@admin.register(Patients)
+class PatientsAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'cpf', 'birth_date', 'phone', 'created_at', 'updated_at')
+    search_fields = ('id', 'cpf',)
+
+
+@admin.register(HealthcareProfessional)
+class HealthcareProfessionalAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'cpf', 'rg', 'board_number', 'state_of_issue_UF', 'digital_signature', 'created_at', 'updated_at')
+    search_fields = ('id', 'cpf', 'state_of_issue_UF', 'digital_signature',)

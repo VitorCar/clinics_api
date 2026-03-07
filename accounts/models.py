@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from clinics.models import Specialty
 
 
 # Como o usuário sera criado
@@ -33,7 +34,7 @@ class CustomUsuario(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = MyUserManager()
 
@@ -49,9 +50,12 @@ class Patients(models.Model):
     user = models.OneToOneField(CustomUsuario, on_delete=models.CASCADE, related_name='patient')
     cpf = models.CharField(max_length=11 ,unique=True)
     birth_date = models.DateField(blank=True, null=True)
-    phone = models.IntegerField(max_length=20)
+    phone = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.full_name} ({self.user.email})"
 
 
 class HealthcareProfessional(models.Model):
@@ -61,7 +65,10 @@ class HealthcareProfessional(models.Model):
     rg = models.CharField(max_length=15, blank=True, null=True)
     board_number = models.CharField(max_length=20, verbose_name="Número do Conselho")
     state_of_issue_UF = models.CharField(max_length=3, blank=True, null=True, verbose_name="Estado(UF) do Conselho")
-    specialist = models.ManyToManyField("clinics.Specialty", related_name="professionals")
+    specialty = models.ManyToManyField(Specialty, related_name="professionals")
     digital_signature = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.full_name} ({self.user.email})"
