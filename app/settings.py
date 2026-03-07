@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'accounts',
+    'clinics',
+    'scheduling',
+    'consultations',
 ]
 
 MIDDLEWARE = [
