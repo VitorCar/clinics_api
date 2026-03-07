@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / cached files
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment
+venv/
+env/
+.env/
+.env
+
+# Database
+*.sqlite3
+*.db
+
+# Media files
+media/
+
+# Static files (if collected into a single directory)
+static_cdn/
+staticfiles/
+
+# Logs
+*.log
+logs/
+
+# Development specific files
+.DS_Store
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Local settings (if you use a separate local settings file not meant for production)
+local_settings.py
+
+# Pipenv files (if using Pipenv)
+Pipfile.lock
+senha.txt
+docker_information.txt
