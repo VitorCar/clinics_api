@@ -21,7 +21,7 @@ class Consultation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.patient.user.full_name} - {self.professional.user.full_name}"
+        return f"{self.appointment.patient.user.full_name} - {self.appointment.professional.user.full_name}"
     
 
 class Prescription(models.Model):

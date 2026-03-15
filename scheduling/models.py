@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import Patients, HealthcareProfessional
 from clinics.models import Clinic
 import datetime
+from datetime import timedelta
 
 
 class ScheduleAppointment(models.Model):
@@ -22,7 +23,7 @@ class ScheduleAppointment(models.Model):
     scheduled_time = models.TimeField() # "14:30:00"
     status = models.CharField(max_length=15, choices=Status.choices, default=Status.AGENDADO)
     reason_for_consultation = models.TextField(blank=True, null=True)
-    average_duration = models.DurationField()
+    average_duration = models.DurationField(default=timedelta(minutes=30)) # "00:30:00"
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -60,7 +61,7 @@ class ClinicSchedule(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.patient.user.full_name} - {self.scheduled_date}"
+        return f"{self.clinic.name}"
 
 
 class ClinicHoliday(models.Model):
