@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'drf_spectacular',
+    'swagger',
 
     'accounts',
     'clinics',
@@ -128,5 +130,33 @@ STATIC_URL = 'static/'
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"
-    ]
+    ],
+    
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Clinics_api',
+    'DESCRIPTION':'''
+### O que é o projeto
+Uma API robusta para gestão clínica que integra:
+* **Clínicas & Profissionais:** Controle estrutural.
+* **Pacientes & Consultas:** Gestão de fluxo de atendimento.
+* **Prescrições & Medicamentos:** Automação de cuidados e catálogo farmacológico.
+    ''',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+
+    'SWAGGER_UI_SETTINGS': {
+        'operationsSorter': 'method',
+        'tagsSorter': 'alpha',
+        'docExpansion': 'list',
+        'filter': True,  
+    },
+    'CONTACT': {'name': 'Vitor Carvalho', 'email': 'vtocarvalho2000@gmail.com'},
 }
