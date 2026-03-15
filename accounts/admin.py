@@ -1,36 +1,86 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUsuario, HealthcareProfessional, Patients
+from.forms import CustomUsuarioCreationForm, CustomUsuarioChangeForm
+
+
 
 @admin.register(CustomUsuario)
 class CustomUsuarioAdmin(UserAdmin):
-    # Campos exibidos na lista principal
-    list_display = ('email', 'full_name', 'role', 'is_staff', 'is_active')
-    
-    # Filtros laterais
-    list_filter = ('role', 'is_staff', 'is_active')
-    
-    # Ordenação padrão
-    ordering = ('email',)
-    
-    # Configuração dos campos dentro do formulário de edição
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Informações Pessoais', {'fields': ('full_name', 'role')}),
-        ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Datas Importantes', {'fields': ('date_joined', 'update_at')}),
+
+    add_form = CustomUsuarioCreationForm
+    form = CustomUsuarioChangeForm
+    model = CustomUsuario
+
+    list_display = (
+        'email',
+        'full_name',
+        'role',
+        'is_staff',
+        'is_active'
     )
 
-    # Campos que aparecem ao criar um usuário novo no admin
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'full_name', 'role', 'password', 'is_staff', 'is_active'),
+    list_filter = (
+        'role',
+        'is_staff',
+        'is_active',
+        'is_superuser'
+    )
+
+    search_fields = (
+        'email',
+        'full_name'
+    )
+
+    ordering = ('email',)
+
+    readonly_fields = (
+        'date_joined',
+        'last_login'
+    )
+
+    fieldsets = (
+        ('Credenciais de Acesso', {
+            'fields': ('email', 'password')
+        }),
+
+        ('Informações Pessoais', {
+            'fields': ('full_name', 'role')
+        }),
+
+        ('Permissões e Status', {
+            'fields': (
+                'is_active',
+                'is_staff',
+                'is_superuser',
+                'groups',
+                'user_permissions'
+            )
+        }),
+
+        ('Datas Importantes', {
+            'fields': (
+                'last_login',
+                'date_joined'
+            )
         }),
     )
 
-    # Campo de busca
-    search_fields = ('email', 'full_name')
+
+    add_fieldsets = (
+        ('Dados do Novo Usuário', {
+            'classes': ('wide',),
+            'fields': (
+                'email',
+                'full_name',
+                'role',
+                'password1',
+                'password2',
+                'is_staff',
+                'is_active'
+            ),
+        }),
+    )
 
 
 @admin.register(Patients)

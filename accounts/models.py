@@ -10,15 +10,27 @@ class MyUserManager(BaseUserManager):
             raise ValueError('O e-mail é obrigatório')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+
+        if not password:
+            raise ValueError("Users must have a password")
+
+        return user
 
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', 'ADMIN')
-        return self.create_user(email, password, **extra_fields)
+        extra_fields.setdefault('role', CustomUsuario.Roles.ADMIN)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser precisa ter is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser precisa ter is_superuser=True.')
+        if extra_fields.get('role') != 'ADMIN':
+            raise ValueError('Superuser precisa ter role="ADMIN".')
+        
+        return super().create_user(email, password, **extra_fields)
     
 
 class CustomUsuario(AbstractBaseUser, PermissionsMixin):
