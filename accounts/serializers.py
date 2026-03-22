@@ -9,6 +9,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUsuario
         fields = ['id','email', 'password', 'full_name', 'role']
 
+class UserListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUsuario
+        fields = ['id','email', 'full_name', 'role']
+
 
 class PatientSerializer(serializers.ModelSerializer):
 
@@ -18,13 +24,15 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class PatientListSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    full_name = serializers.ReadOnlyField(source='user.full_name')
+    email = serializers.ReadOnlyField(source='user.email')
 
     class Meta:
         model = Patients
         fields = [
             'id',
-            'user',
+            'full_name',
+            'email',
             'cpf',
             'birth_date',
             'phone',
@@ -41,14 +49,16 @@ class ProfessionalSerializer(serializers.ModelSerializer):
 
 
 class ProfessionalListSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    full_name = serializers.ReadOnlyField(source='user.full_name')
+    email = serializers.ReadOnlyField(source='user.email')
     specialty = SpecialtySerializers(many=True)
 
     class Meta:
         model = HealthcareProfessional
         fields = [
             'id',
-            'user',
+            'full_name',
+            'email',
             'cpf',
             'rg',
             'board_number',
