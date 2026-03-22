@@ -3,7 +3,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import CustomUsuario
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserListSerializer
 
 
 @extend_schema_view(
@@ -22,8 +22,12 @@ from .serializers import UserSerializer
 class UserListCreateApiView(ListCreateAPIView):
 
     queryset = CustomUsuario.objects.all()
-    permission_classes = (AllowAny,) # momentanio 
-    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return UserListSerializer
+        return UserSerializer
 
 
 @extend_schema_view(
@@ -54,4 +58,8 @@ class UserRetrieveUpdateDestroyApiView(RetrieveUpdateDestroyAPIView):
 
     queryset = CustomUsuario.objects.all()
     permission_classes = (AllowAny,)
-    serializer_class = UserSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return UserListSerializer
+        return UserSerializer
