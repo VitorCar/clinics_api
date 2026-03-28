@@ -1,5 +1,5 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Specialty
 from .serializers import SpecialtySerializers
@@ -21,7 +21,7 @@ from .serializers import SpecialtySerializers
 class SpecialtyListCreateAPIView(ListCreateAPIView):
 
     queryset = Specialty.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = SpecialtySerializers
 
 
@@ -52,5 +52,5 @@ class SpecialtyListCreateAPIView(ListCreateAPIView):
 class SpecialtyRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Specialty.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = SpecialtySerializers

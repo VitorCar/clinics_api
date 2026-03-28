@@ -1,5 +1,5 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Prescription
 from .serializers import PrescriptionSerializers, PrescriptionListSerializers
@@ -21,7 +21,7 @@ from .serializers import PrescriptionSerializers, PrescriptionListSerializers
 class PrescriptionListCreateAPIView(ListCreateAPIView):
 
     queryset = Prescription.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +56,7 @@ class PrescriptionListCreateAPIView(ListCreateAPIView):
 class PrescriptionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Prescription.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":

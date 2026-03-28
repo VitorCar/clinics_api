@@ -1,5 +1,5 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Clinic
 from .serializers import ClinicSerializers
@@ -21,7 +21,7 @@ from .serializers import ClinicSerializers
 class ClinicListCreateAPIView(ListCreateAPIView):
 
     queryset = Clinic.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ClinicSerializers
 
 
@@ -52,5 +52,5 @@ class ClinicListCreateAPIView(ListCreateAPIView):
 class ClinicRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Clinic.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = ClinicSerializers

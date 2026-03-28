@@ -1,5 +1,5 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import ScheduleAppointment
 from .serializers import ScheduleAppointmentSerializers, ScheduleAppointmentListSerializers
@@ -21,7 +21,7 @@ from .serializers import ScheduleAppointmentSerializers, ScheduleAppointmentList
 class ScheduleAppointmentListCreateAPIView(ListCreateAPIView):
 
     queryset = ScheduleAppointment.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +56,7 @@ class ScheduleAppointmentListCreateAPIView(ListCreateAPIView):
 class ScheduleAppointmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = ScheduleAppointment.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
