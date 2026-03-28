@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import CustomUsuario
 from .serializers import UserSerializer, UserListSerializer
@@ -22,7 +22,7 @@ from .serializers import UserSerializer, UserListSerializer
 class UserListCreateApiView(ListCreateAPIView):
 
     queryset = CustomUsuario.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser, IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -57,7 +57,7 @@ class UserListCreateApiView(ListCreateAPIView):
 class UserRetrieveUpdateDestroyApiView(RetrieveUpdateDestroyAPIView):
 
     queryset = CustomUsuario.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminUser, IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
