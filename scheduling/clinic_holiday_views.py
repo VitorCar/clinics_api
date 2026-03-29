@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import ClinicHoliday
 from .serializers import ClinicHolidaySerializers, ClinicHolidayListSerializer
+from app.permissions import GlobalDefaultPermissions
 
 
 @extend_schema_view(
@@ -21,7 +22,7 @@ from .serializers import ClinicHolidaySerializers, ClinicHolidayListSerializer
 class ClinicHolidayListCreateAPIView(ListCreateAPIView):
 
     queryset = ClinicHoliday.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -57,7 +58,7 @@ class ClinicHolidayListCreateAPIView(ListCreateAPIView):
 class ClinicHolidayRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = ClinicHoliday.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":

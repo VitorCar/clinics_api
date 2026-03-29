@@ -11,6 +11,7 @@ class ConsultationSerializers(serializers.ModelSerializer):
 
 
 class ConsultationListSerializers(serializers.ModelSerializer):
+    name_patient = serializers.ReadOnlyField(source='appointment.patient.user.full_name')
     clinic_name = serializers.ReadOnlyField(source='appointment.clinic.name')
     clinic_phone = serializers.ReadOnlyField(source='appointment.clinic.phone')
     professional_name = serializers.ReadOnlyField(source='appointment.professional.user.full_name')
@@ -23,6 +24,7 @@ class ConsultationListSerializers(serializers.ModelSerializer):
         model = Consultation
         fields = [
             'id',
+            'name_patient',
             'clinic_name',
             'clinic_phone',
             'professional_name',
@@ -47,6 +49,7 @@ class PrescriptionSerializers(serializers.ModelSerializer):
 
 
 class PrescriptionListSerializers(serializers.ModelSerializer):
+    name_patient = serializers.ReadOnlyField(source='consultation.appointment.patient.user.full_name')
     clinic_name = serializers.ReadOnlyField(source='consultation.appointment.clinic.name')
     professional_name = serializers.ReadOnlyField(source='consultation.appointment.professional.user.full_name')
     professional_crm = serializers.ReadOnlyField(source='consultation.appointment.professional.board_number')
@@ -60,6 +63,7 @@ class PrescriptionListSerializers(serializers.ModelSerializer):
         model = Prescription
         fields = [
             'id',
+            'name_patient',
             'clinic_name',
             'professional_name', 
             'professional_crm',

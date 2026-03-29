@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Prescription
 from .serializers import PrescriptionSerializers, PrescriptionListSerializers
+from accounts.utils import is_patient, is_professional
+from app.permissions import GlobalDefaultPermissions
 
 
 @extend_schema_view(
@@ -20,8 +22,34 @@ from .serializers import PrescriptionSerializers, PrescriptionListSerializers
 )
 class PrescriptionListCreateAPIView(ListCreateAPIView):
 
-    queryset = Prescription.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    def get_queryset(self):
+
+        user = self.request.user
+
+        queryset = Prescription.objects.select_related(
+            "consultation__appointment__patient__user",
+            "consultation__appointment__professional__user",
+        )
+
+        # PACIENTE
+        if is_patient(user):
+            return queryset.filter(
+                consultation__appointment__patient=user.patient
+            )
+
+        # PROFISSIONAL
+        if is_professional(user):
+            return queryset.filter(
+                consultation__appointment__professional=user.professional
+            )
+
+        # CLÍNICA / ADMIN
+        if user.is_staff:
+            return queryset
+
+        return Prescription.objects.none()
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +84,7 @@ class PrescriptionListCreateAPIView(ListCreateAPIView):
 class PrescriptionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Prescription.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":

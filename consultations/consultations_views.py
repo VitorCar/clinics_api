@@ -1,8 +1,10 @@
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Consultation
 from .serializers import ConsultationSerializers, ConsultationListSerializers
+from accounts.utils import is_patient, is_professional
+from app.permissions import GlobalDefaultPermissions
 
 
 @extend_schema_view(
@@ -20,8 +22,28 @@ from .serializers import ConsultationSerializers, ConsultationListSerializers
 )
 class ConsultationListCreateAPIView(ListCreateAPIView):
 
-    queryset = Consultation.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    def get_queryset(self):
+        user = self.request.user
+
+       # PACIENTE
+        if is_patient(user):
+            return Consultation.objects.filter(
+                appointment__patient=user.patient
+            )
+
+        # PROFISSIONAL
+        if is_professional(user):
+            return Consultation.objects.filter(
+                appointment__professional=user.professional
+            )
+
+        # CLÍNICA / ADMIN
+        if user.is_staff:
+            return Consultation.objects.all()
+
+        return Consultation.objects.none()
 
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +78,7 @@ class ConsultationListCreateAPIView(ListCreateAPIView):
 class ConsultationRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Consultation.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
