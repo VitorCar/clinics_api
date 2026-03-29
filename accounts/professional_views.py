@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from  .models import HealthcareProfessional
 from .serializers import ProfessionalSerializer, ProfessionalListSerializer
+from .utils import is_professional
+from app.permissions import GlobalDefaultPermissions
 
 
 @extend_schema_view(
@@ -20,8 +22,12 @@ from .serializers import ProfessionalSerializer, ProfessionalListSerializer
 )
 class ProfessionalListCreateApiView(ListCreateAPIView):
 
-    queryset = HealthcareProfessional.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_professional(user):
+            return HealthcareProfessional.objects.filter(user=user)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +62,7 @@ class ProfessionalListCreateApiView(ListCreateAPIView):
 class ProfessionalRetrieveUpdateDestroyApiView(RetrieveUpdateDestroyAPIView):
 
     queryset = HealthcareProfessional.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":

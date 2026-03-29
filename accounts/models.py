@@ -60,7 +60,7 @@ class CustomUsuario(AbstractBaseUser, PermissionsMixin):
 class Patients(models.Model):
     
     user = models.OneToOneField(CustomUsuario, on_delete=models.CASCADE, related_name='patient')
-    cpf = models.CharField(max_length=11 ,unique=True)
+    cpf = models.CharField(max_length=11 ,unique=True, null=True, blank=True)
     birth_date = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -73,7 +73,7 @@ class Patients(models.Model):
 class HealthcareProfessional(models.Model):
     
     user = models.OneToOneField(CustomUsuario, on_delete=models.CASCADE, related_name='professional')
-    cpf = models.CharField(max_length=11 ,unique=True)
+    cpf = models.CharField(max_length=11 ,unique=True, null=True, blank=True)
     rg = models.CharField(max_length=15, blank=True, null=True)
     board_number = models.CharField(max_length=20, verbose_name="Número do Conselho")
     state_of_issue_UF = models.CharField(max_length=3, blank=True, null=True, verbose_name="Estado(UF) do Conselho")

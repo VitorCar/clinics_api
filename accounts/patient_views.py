@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Patients
 from .serializers import PatientSerializer, PatientListSerializer
+from .utils import is_patient
+from app.permissions import GlobalDefaultPermissions
 
 
 @extend_schema_view(
@@ -20,8 +22,13 @@ from .serializers import PatientSerializer, PatientListSerializer
 )
 class PatientListCreateApiView(ListCreateAPIView):
 
-    queryset = Patients.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if is_patient(user):
+            return Patients.objects.filter(user=user)
+        
     
     def get_serializer_class(self):
         if self.request.method == "GET":
@@ -56,7 +63,7 @@ class PatientListCreateApiView(ListCreateAPIView):
 class PatientRetrieveUpdateDestroyApiView(RetrieveUpdateDestroyAPIView):
 
     queryset = Patients.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
