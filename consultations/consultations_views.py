@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Consultation
 from .serializers import ConsultationSerializers, ConsultationListSerializers
 from accounts.utils import is_patient, is_professional
-from app.permissions import GlobalDefaultPermissions
+from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
 @extend_schema_view(
@@ -78,7 +78,7 @@ class ConsultationListCreateAPIView(ListCreateAPIView):
 class ConsultationRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Consultation.objects.all()
-    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions, IsOwnerOrClinic,)
 
     def get_serializer_class(self):
         if self.request.method == "GET":

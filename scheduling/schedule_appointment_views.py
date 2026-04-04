@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import ScheduleAppointment
 from .serializers import ScheduleAppointmentSerializers, ScheduleAppointmentListSerializers
 from accounts.utils import is_professional, is_patient
-from app.permissions import GlobalDefaultPermissions
+from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
 @extend_schema_view(
@@ -87,7 +87,7 @@ class ScheduleAppointmentListCreateAPIView(ListCreateAPIView):
 class ScheduleAppointmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = ScheduleAppointment.objects.all()
-    permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+    permission_classes = (IsAuthenticated, GlobalDefaultPermissions, IsOwnerOrClinic,)
     
     def get_serializer_class(self):
         if self.request.method == "GET":
