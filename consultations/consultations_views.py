@@ -1,5 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Consultation
 from .serializers import ConsultationSerializers, ConsultationListSerializers
@@ -23,6 +25,32 @@ from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 class ConsultationListCreateAPIView(ListCreateAPIView):
 
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+
+    # FILTER
+    filterset_fields = [
+        "service_Status",
+        "created_at",
+    ]
+
+    # SEARCH
+    search_fields = [
+        "appointment__patient__user__full_name",
+        "appointment__professional__user__full_name",
+    ]
+
+    # ORDER
+    ordering_fields = [
+        "created_at",
+        "finalized_at",
+    ]
+
+    ordering = ["-created_at"]
 
     def get_queryset(self):
         user = self.request.user
