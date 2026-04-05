@@ -1,5 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Prescription
 from .serializers import PrescriptionSerializers, PrescriptionListSerializers
@@ -23,6 +25,28 @@ from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 class PrescriptionListCreateAPIView(ListCreateAPIView):
 
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+
+    filterset_fields = [
+        "created_at",
+    ]
+
+    search_fields = [
+        "consultation__appointment__patient__user__full_name",
+        "consultation__appointment__professional__user__full_name",
+    ]
+
+    ordering_fields = [
+        "created_at",
+    ]
+
+    ordering = ["-created_at"]
+
 
     def get_queryset(self):
 
