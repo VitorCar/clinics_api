@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Prontuário - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2">
+        {% if object %}
+            <i class="bi bi-pencil-square text-success me-2"></i> Editar Prontuário Clínico
+        {% else %}
+            <i class="bi bi-journal-plus text-success me-2"></i> Registrar Novo Atendimento
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'consultation_list' %}" class="btn btn-sm btn-outline-secondary shadow-sm"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <h5 class="text-success mb-3"><i class="bi bi-calendar-check me-1"></i> Vínculo</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label for="{{ form.appointment.id_for_label }}" class="form-label fw-bold">{{ form.appointment.label }}</label>
+                            {{ form.appointment }}
+                            <div class="form-text text-muted small">Apenas agendamentos sem prontuários vinculados estão listados.</div>
+                            <div class="text-danger small mt-1">{{ form.appointment.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-secondary">
+
+                    <h5 class="text-success mb-3 mt-4"><i class="bi bi-heart-pulse me-1"></i> Dados Clínicos</h5>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label for="{{ form.clinical_notes.id_for_label }}" class="form-label fw-bold">{{ form.clinical_notes.label }}</label>
+                            {{ form.clinical_notes }}
+                            <div class="text-danger small mt-1">{{ form.clinical_notes.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.disease_history.id_for_label }}" class="form-label fw-bold">{{ form.disease_history.label }}</label>
+                            {{ form.disease_history }}
+                            <div class="text-danger small mt-1">{{ form.disease_history.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.physical_examination.id_for_label }}" class="form-label fw-bold">{{ form.physical_examination.label }}</label>
+                            {{ form.physical_examination }}
+                            <div class="text-danger small mt-1">{{ form.physical_examination.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-secondary mt-4">
+
+                    <h5 class="text-success mb-3 mt-4"><i class="bi bi-clipboard-check me-1"></i> Finalização</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.service_Status.id_for_label }}" class="form-label fw-bold">{{ form.service_Status.label }}</label>
+                            {{ form.service_Status }}
+                            <div class="text-danger small mt-1">{{ form.service_Status.errors }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.final_duration.id_for_label }}" class="form-label fw-bold">{{ form.final_duration.label }}</label>
+                            {{ form.final_duration }}
+                            <div class="text-danger small mt-1">{{ form.final_duration.errors }}</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="{{ form.digital_signature.id_for_label }}" class="form-label fw-bold">{{ form.digital_signature.label }}</label>
+                            {{ form.digital_signature }}
+                            <div class="text-danger small mt-1">{{ form.digital_signature.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5 text-secondary">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-success px-4 shadow-sm fw-bold">
+                            <i class="bi bi-save me-1"></i> {% if object %}Atualizar Prontuário{% else %}Salvar Prontuário{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Prontuário - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom d-print-none">
+    <h1 class="h2"><i class="bi bi-file-earmark-medical text-success me-2"></i> Prontuário Eletrónico</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button type="button" class="btn btn-sm btn-outline-secondary shadow-sm me-2" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> Imprimir
+        </button>
+        <a href="{% url 'consultation_list' %}" class="btn btn-sm btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Voltar à Lista
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-dark text-white p-3">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i> Informações do Atendimento</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted small fw-bold text-uppercase">Paciente</div>
+                    <div class="col-sm-8 fw-semibold fs-5">{{ consulta.appointment.patient.user.full_name }} (CPF: {{ consulta.appointment.patient.cpf }})</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted small fw-bold text-uppercase">Médico Responsável</div>
+                    <div class="col-sm-8">{{ consulta.appointment.professional.user.full_name }} 
+                        <span class="text-muted small">({{ consulta.appointment.professional.board_number }} - {{ consulta.appointment.professional.state_of_issue_UF|upper }})</span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted small fw-bold text-uppercase">Local e Data</div>
+                    <div class="col-sm-8">
+                        {{ consulta.appointment.clinic.name }} — 
+                        {{ consulta.appointment.scheduled_date|date:"d/m/Y" }} às {{ consulta.appointment.scheduled_time|time:"H:i" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4 text-muted small fw-bold text-uppercase">Status Final</div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-success">{{ consulta.get_service_Status_display }}</span>
+                        {% if consulta.final_duration %}
+                            <span class="ms-3 text-muted small"><i class="bi bi-stopwatch me-1"></i> Duração: {{ consulta.final_duration }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-header bg-success text-white p-3">
+                <h5 class="mb-0"><i class="bi bi-heart-pulse me-2"></i> Relatório Clínico</h5>
+            </div>
+            <div class="card-body p-4">
+                
+                <h6 class="text-success fw-bold border-bottom pb-2 mb-3">História da Moléstia (HMA/HMP)</h6>
+                <p class="mb-4 text-dark" style="white-space: pre-line;">
+                    {{ consulta.disease_history|default:"Nenhum histórico registado." }}
+                </p>
+
+                <h6 class="text-success fw-bold border-bottom pb-2 mb-3">Exame Físico</h6>
+                <p class="mb-4 text-dark" style="white-space: pre-line;">
+                    {{ consulta.physical_examination|default:"Nenhum exame físico registado." }}
+                </p>
+
+                <h6 class="text-success fw-bold border-bottom pb-2 mb-3">Evolução / Anotações Clínicas</h6>
+                <p class="mb-4 text-dark" style="white-space: pre-line;">
+                    {{ consulta.clinical_notes|default:"Nenhuma anotação clínica registada." }}
+                </p>
+
+            </div>
+            
+            <div class="card-footer bg-light p-4 text-center text-muted">
+                <div class="mb-2 mt-3">___________________________________________________</div>
+                <div class="fw-bold">{{ consulta.appointment.professional.user.full_name }}</div>
+                <div class="small">Assinatura Eletrónica: <span class="font-monospace text-secondary">{{ consulta.digital_signature|default:"Não assinada" }}</span></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

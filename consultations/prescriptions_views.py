@@ -1,12 +1,71 @@
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.db.models import Q
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Prescription
+from .forms import PrescriptionForm
 from .serializers import PrescriptionSerializers, PrescriptionListSerializers
 from accounts.utils import is_patient, is_professional
 from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
+
+
+class PrescriptionListView(ListView):
+    model = Prescription
+    template_name = 'prescription_list.html'
+    context_object_name = 'prescriptions'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related(
+            'consultation__appointment__patient__user',
+            'consultation__appointment__professional__user'
+        ).order_by('-created_at')
+        
+        q = self.request.GET.get('q')
+
+        if q:
+            queryset = queryset.filter(
+                Q(medicines_name__icontains=q) | 
+                Q(consultation__appointment__patient__user__full_name__icontains=q)
+            )
+            
+        return queryset
+
+
+class PrescriptionCreateView(CreateView):
+    model = Prescription
+    form_class = PrescriptionForm
+    template_name = 'prescription_create.html'
+    success_url = reverse_lazy('prescription_list')
+
+
+class PrescriptionUpdateView(UpdateView):
+    model = Prescription
+    form_class = PrescriptionForm
+    template_name = 'prescription_create.html'
+    success_url = reverse_lazy('prescription_list')
+
+
+class PrescriptionDeleteView(DeleteView):
+    model = Prescription
+    template_name = 'prescription_delete.html'
+    success_url = reverse_lazy('prescription_list')
+
+
+class PrescriptionDetailView(DetailView):
+    model = Prescription
+    template_name = 'prescription_detail.html'
+    context_object_name = 'prescription'
+
+    def get_queryset(self):
+        return super().get_queryset().select_related(
+            'consultation__appointment__patient__user',
+            'consultation__appointment__professional__user',
+            'consultation__appointment__clinic'
+        )
 
 
 @extend_schema_view(

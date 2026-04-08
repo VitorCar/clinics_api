@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Prontuário - HealthCare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-exclamation-octagon text-danger mb-3 d-block" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold">Atenção! Ação Irreversível</h4>
+                <p class="text-muted mb-4">
+                    Você está prestes a excluir o registro clínico (prontuário) referente à consulta de <strong>{{ object.appointment.patient.user.full_name }}</strong> com o(a) <strong>{{ object.appointment.professional.user.full_name }}</strong>.
+                </p>
+                <div class="alert alert-danger small">
+                    <strong>Alerta:</strong> A exclusão de dados clínicos pode ferir diretrizes de guarda de prontuários médicos. Só prossiga se o registro foi criado acidentalmente.
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        <a href="{% url 'consultation_list' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Sim, Excluir Prontuário</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

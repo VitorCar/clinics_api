@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Receitas Médicas - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-capsule text-primary me-2"></i> Receitas e Prescrições</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'prescription_create' %}" class="btn btn-sm btn-primary shadow-sm fw-bold">
+            <i class="bi bi-plus-circle me-1"></i> Nova Prescrição
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar Medicamento ou Paciente</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: Dipirona, João Silva..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-1 shadow-sm">Pesquisar</button>
+                <a href="{% url 'prescription_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Data</th>
+                        <th>Paciente</th>
+                        <th>Medicamento</th>
+                        <th>Duração</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescricao in prescriptions %}
+                    <tr>
+                        <td class="ps-4 text-muted small"><i class="bi bi-calendar-event me-1"></i>{{ prescricao.created_at|date:"d/m/Y" }}</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ prescricao.consultation.appointment.patient.user.full_name }}</div>
+                            <div class="text-muted small">Médico: {{ prescricao.consultation.appointment.professional.user.full_name }}</div>
+                        </td>
+                        <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary">{{ prescricao.medicines_name }}</span></td>
+                        <td class="text-secondary small">{{ prescricao.duration }}</td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'prescription_detail' prescricao.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Visualizar / Imprimir Receita"><i class="bi bi-printer"></i></a>
+                            <a href="{% url 'prescription_update' prescricao.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'prescription_delete' prescricao.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-prescription2 fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhuma prescrição registada</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
