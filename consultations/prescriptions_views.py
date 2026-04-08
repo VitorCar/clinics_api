@@ -17,6 +17,7 @@ class PrescriptionListView(ListView):
     model = Prescription
     template_name = 'prescription_list.html'
     context_object_name = 'prescriptions'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related(
