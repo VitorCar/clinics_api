@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Feriados e Recessos - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-calendar-x text-warning me-2"></i> Feriados e Recessos</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'clinic_holiday_create' %}" class="btn btn-sm btn-warning text-dark shadow-sm fw-semibold">
+            <i class="bi bi-plus-circle me-1"></i> Novo Feriado
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="clinic" class="form-label small fw-bold text-secondary">Buscar Clínica</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="clinic" id="clinic" class="form-control border-start-0" 
+                           placeholder="Nome da clínica..." value="{{ request.GET.clinic }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="date" class="form-label small fw-bold text-secondary">Data Específica</label>
+                <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ request.GET.date }}">
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-2 shadow-sm">Filtrar</button>
+                <a href="{% url 'clinic_holiday_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-borderless mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Clínica</th>
+                        <th>Data</th>
+                        <th>Descrição / Motivo</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for holiday in clinic_holidays %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-dark">{{ holiday.clinic.name }}</td>
+                        <td><span class="badge bg-secondary">{{ holiday.date|date:"d/m/Y" }}</span></td>
+                        <td class="text-muted">{{ holiday.description|truncatechars:50 }}</td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'clinic_holiday_update' holiday.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'clinic_holiday_delete' holiday.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="bi bi-cup-hot fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhum feriado cadastrado</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

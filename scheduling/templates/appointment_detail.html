@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Agendamento - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-calendar2-range text-primary me-2"></i> Detalhes do Agendamento</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'schedule_appointments_update' appointment.pk %}" class="btn btn-sm btn-primary shadow-sm me-2">
+            <i class="bi bi-pencil me-1"></i> Editar
+        </a>
+        <a href="{% url 'schedule_appointments_list' %}" class="btn btn-sm btn-outline-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 text-primary fw-bold">Informações da Consulta</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-bold text-uppercase d-block">Data e Horário</label>
+                        <span class="fs-5 fw-bold text-dark">
+                            <i class="bi bi-calendar-event me-1"></i> {{ appointment.scheduled_date|date:"d/m/Y" }} 
+                            às {{ appointment.scheduled_time|time:"H:i" }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-bold text-uppercase d-block">Duração Estimada</label>
+                        <span class="fs-5 text-dark"><i class="bi bi-stopwatch me-1"></i> {{ appointment.average_duration }}</span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="text-muted small fw-bold text-uppercase d-block">Motivo da Consulta</label>
+                    <div class="p-3 bg-light rounded border mt-1">
+                        {{ appointment.reason_for_consultation|default:"Nenhum motivo informado."|linebreaks }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-bold text-uppercase d-block">Status Atual</label>
+                        <div class="mt-1">
+                            {% if appointment.status == 'AGENDADO' %}
+                                <span class="badge bg-primary fs-6">Agendado</span>
+                            {% elif appointment.status == 'CONFIRMADO' %}
+                                <span class="badge bg-info text-dark fs-6">Confirmado</span>
+                            {% elif appointment.status == 'CONCLUIDO' %}
+                                <span class="badge bg-success fs-6">Concluído</span>
+                            {% elif appointment.status == 'CANCELADO' %}
+                                <span class="badge bg-danger fs-6">Cancelado</span>
+                            {% else %}
+                                <span class="badge bg-dark fs-6">{{ appointment.status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-bold text-uppercase d-block">Criado em</label>
+                        <span class="text-muted small">{{ appointment.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-3 mb-4 border-start border-4 border-danger">
+            <div class="card-body">
+                <h6 class="text-danger fw-bold mb-3"><i class="bi bi-person-hearts me-1"></i> Paciente</h6>
+                <div class="fw-bold fs-5">{{ appointment.patient.user.full_name }}</div>
+                <div class="text-muted small mb-2">{{ appointment.patient.user.email }}</div>
+                <div class="small"><strong>CPF:</strong> {{ appointment.patient.cpf|default:"-" }}</div>
+                <div class="small"><strong>Telefone:</strong> {{ appointment.patient.phone }}</div>
+                <hr>
+                <a href="{% url 'schedule_appointments_update' appointment.patient.pk %}" class="btn btn-sm btn-outline-danger w-100">Ver Ficha Completa</a>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3 mb-4 border-start border-4 border-info">
+            <div class="card-body">
+                <h6 class="text-info fw-bold mb-3"><i class="bi bi-person-badge me-1"></i> Profissional</h6>
+                <div class="fw-bold">{{ appointment.professional.user.full_name }}</div>
+                <div class="text-muted small mb-3">Conselho: {{ appointment.professional.board_number }}</div>
+                
+                <h6 class="text-info fw-bold mb-2 small text-uppercase">Local de Atendimento</h6>
+                <div class="small fw-bold">{{ appointment.clinic.name }}</div>
+                <div class="text-muted x-small">{{ appointment.clinic.address|truncatechars:60 }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

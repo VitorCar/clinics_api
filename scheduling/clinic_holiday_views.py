@@ -1,9 +1,51 @@
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from .forms import ClinicHolidayForm
 from .models import ClinicHoliday
 from .serializers import ClinicHolidaySerializers, ClinicHolidayListSerializer
 from app.permissions import GlobalDefaultPermissions
+
+
+class ClinicHolidayListView(ListView):
+    model = ClinicHoliday
+    template_name = 'clinic_holiday_list.html'
+    context_object_name = 'clinic_holidays'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('date') 
+        
+        clinic_name = self.request.GET.get('clinic')
+        date_filter = self.request.GET.get('date')
+
+        if clinic_name:
+            queryset = queryset.filter(clinic__name__icontains=clinic_name)
+        if date_filter:
+            queryset = queryset.filter(date=date_filter)
+            
+        return queryset
+
+
+class ClinicHolidayCreateView(CreateView):
+    model = ClinicHoliday
+    form_class = ClinicHolidayForm
+    template_name = 'clinic_holiday_create.html'
+    success_url = reverse_lazy('clinic_holiday_list')
+
+
+class ClinicHolidayUpdateView(UpdateView):
+    model = ClinicHoliday
+    form_class = ClinicHolidayForm
+    template_name = 'clinic_holiday_create.html'
+    success_url = reverse_lazy('clinic_holiday_list')
+
+
+class ClinicHolidayDeleteView(DeleteView):
+    model = ClinicHoliday
+    template_name = 'clinic_holiday_delete.html'
+    success_url = reverse_lazy('clinic_holiday_list')
 
 
 @extend_schema_view(

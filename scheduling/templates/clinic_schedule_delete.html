@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Horário - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2 text-danger"><i class="bi bi-exclamação-triangle me-2"></i> Confirmar Exclusão</h1>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-5 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-trash3 text-danger" style="font-size: 4rem;"></i>
+                </div>
+                
+                <h4 class="fw-bold">Tem a certeza?</h4>
+                <p class="text-muted mb-4">
+                    Está prestes a eliminar o horário da clínica <strong>{{ object.clinic.name }}</strong> 
+                    referente a <strong>{{ object.get_days_week_display }}</strong>.
+                    <br>Esta ação não pode ser desfeita.
+                </p>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'clinic_schedule_list' %}" class="btn btn-light border px-4">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">
+                            Sim, Eliminar Registo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

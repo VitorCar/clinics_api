@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendar Consulta - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2">
+        {% if object %}
+            <i class="bi bi-pencil-square text-primary me-2"></i> Editar Agendamento
+        {% else %}
+            <i class="bi bi-calendar-plus text-primary me-2"></i> Agendar Nova Consulta
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'schedule_appointments_list' %}" class="btn btn-sm btn-outline-secondary shadow-sm"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> Conflito de Horário: Este médico já possui uma consulta marcada para este exato dia e horário.
+            </div>
+        {% endif %}
+
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <h5 class="text-primary mb-3"><i class="bi bi-people me-1"></i> Envolvidos</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="{{ form.patient.id_for_label }}" class="form-label fw-bold">{{ form.patient.label }}</label>
+                            {{ form.patient }}
+                            <div class="text-danger small mt-1">{{ form.patient.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.professional.id_for_label }}" class="form-label fw-bold">{{ form.professional.label }}</label>
+                            {{ form.professional }}
+                            <div class="text-danger small mt-1">{{ form.professional.errors }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label for="{{ form.clinic.id_for_label }}" class="form-label fw-bold">{{ form.clinic.label }}</label>
+                            {{ form.clinic }}
+                            <div class="text-danger small mt-1">{{ form.clinic.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-secondary">
+
+                    <h5 class="text-primary mb-3 mt-4"><i class="bi bi-clock-history me-1"></i> Data e Hora</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="{{ form.scheduled_date.id_for_label }}" class="form-label fw-bold">{{ form.scheduled_date.label }}</label>
+                            {{ form.scheduled_date }}
+                            <div class="text-danger small mt-1">{{ form.scheduled_date.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.scheduled_time.id_for_label }}" class="form-label fw-bold">{{ form.scheduled_time.label }}</label>
+                            {{ form.scheduled_time }}
+                            <div class="text-danger small mt-1">{{ form.scheduled_time.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.average_duration.id_for_label }}" class="form-label fw-bold">{{ form.average_duration.label }}</label>
+                            {{ form.average_duration }}
+                            <div class="text-danger small mt-1">{{ form.average_duration.errors }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-secondary mt-4">
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-12">
+                            <label for="{{ form.reason_for_consultation.id_for_label }}" class="form-label fw-bold">{{ form.reason_for_consultation.label }}</label>
+                            {{ form.reason_for_consultation }}
+                            <div class="text-danger small mt-1">{{ form.reason_for_consultation.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5 text-secondary">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm fw-bold">
+                            <i class="bi bi-save me-1"></i> {% if object %}Atualizar Agendamento{% else %}Salvar Agendamento{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

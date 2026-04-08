@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Agendamentos - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-calendar2-check text-primary me-2"></i> Agendamentos</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'schedule_appointments_create' %}" class="btn btn-sm btn-primary shadow-sm fw-bold">
+            <i class="bi bi-plus-circle me-1"></i> Agendar Consulta
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar Paciente ou Médico</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: João da Silva..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="date" class="form-label small fw-bold text-secondary">Data Específica</label>
+                <input type="date" name="date" id="date" class="form-control form-control-sm" value="{{ request.GET.date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label small fw-bold text-secondary">Status</label>
+                <select name="status" id="status" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-1 shadow-sm">Filtrar</button>
+                <a href="{% url 'schedule_appointments_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Data e Hora</th>
+                        <th>Paciente</th>
+                        <th>Profissional</th>
+                        <th>Status</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold"><i class="bi bi-calendar-event text-muted me-1"></i>{{ appointment.scheduled_date|date:"d/m/Y" }}</div>
+                            <div class="text-primary small fw-bold"><i class="bi bi-clock me-1"></i>{{ appointment.scheduled_time|time:"H:i" }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ appointment.patient.user.full_name|default:"Sem Nome" }}</div>
+                            <div class="text-muted small">CPF: {{ appointment.patient.cpf|default:"-" }}</div>
+                        </td>
+                        <td>
+                            <div class="text-dark">{{ appointment.professional.user.full_name }}</div>
+                            <div class="text-muted small"><i class="bi bi-hospital me-1"></i>{{ appointment.clinic.name }}</div>
+                        </td>
+                        <td>
+                            {% if appointment.status == 'AGENDADO' %}
+                                <span class="badge bg-primary">Agendado</span>
+                            {% elif appointment.status == 'CONFIRMADO' %}
+                                <span class="badge bg-info text-dark">Confirmado</span>
+                            {% elif appointment.status == 'CONCLUIDO' %}
+                                <span class="badge bg-success">Concluído</span>
+                            {% elif appointment.status == 'CANCELADO' %}
+                                <span class="badge bg-danger">Cancelado</span>
+                            {% elif appointment.status == 'AUSENTE' %}
+                                <span class="badge bg-dark">Ausente</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'schedule_appointments_detail' appointment.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Ver Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'schedule_appointments_update' appointment.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'schedule_appointments_delete' appointment.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhum agendamento encontrado</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

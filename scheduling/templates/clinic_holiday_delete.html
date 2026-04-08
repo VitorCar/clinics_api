@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Feriado - HealthCare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-trash3 text-danger mb-3 d-block" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold">Tem certeza?</h4>
+                <p class="text-muted mb-4">
+                    Você está prestes a excluir o feriado do dia <strong>{{ object.date|date:"d/m/Y" }}</strong> 
+                    da clínica <strong>{{ object.clinic.name }}</strong>.
+                </p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'clinic_holiday_list' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Sim, Excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Agendamento - HealthCare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-calendar-x text-danger mb-3 d-block" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold">Tem certeza?</h4>
+                <p class="text-muted mb-4">
+                    Você está prestes a excluir definitivamente o agendamento de <strong>{{ object.patient.user.full_name }}</strong>, 
+                    marcado para o dia <strong>{{ object.scheduled_date|date:"d/m/Y" }}</strong> às <strong>{{ object.scheduled_time|time:"H:i" }}</strong>.
+                </p>
+                <div class="alert alert-warning small">
+                    <strong>Nota:</strong> Se o paciente apenas desmarcou a consulta, é recomendável voltar e alterar o status para "Cancelado" em vez de excluir o registro, mantendo o histórico médico.
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        <a href="{% url 'schedule_appointments_list' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Sim, Excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
