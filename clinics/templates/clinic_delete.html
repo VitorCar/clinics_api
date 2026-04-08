@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Clínica - HealthCare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-5 text-center">
+                <i class="bi bi-exclamation-triangle text-danger mb-3 d-block" style="font-size: 4rem;"></i>
+                <h4 class="fw-bold">Tem certeza?</h4>
+                <div class="alert alert-danger mt-3 mb-4 text-start">
+                    Você está prestes a excluir a clínica <strong>{{ object.name }}</strong> (CNPJ: {{ object.cnpj }}).<br><br>
+                    <strong>Atenção:</strong> Se houver agendas, feriados ou outros registros atrelados a esta clínica no banco de dados, eles também poderão ser permanentemente apagados (exclusão em cascata). Recomenda-se apenas alterar o Status para "Inativa" na tela de edição.
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{% url 'clinic_list' %}" class="btn btn-light border px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger px-4 shadow-sm">Sim, Excluir Definitivamente</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

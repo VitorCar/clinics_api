@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Especialidades - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-award text-success me-2"></i> Especialidades Médicas</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'specialty_create' %}" class="btn btn-sm btn-success shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Nova Especialidade
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar Especialidade</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: Ortopedia, Dermatologia..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-2 shadow-sm">Pesquisar</button>
+                <a href="{% url 'specialty_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Nome da Especialidade</th>
+                        <th>Descrição</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for specialty in specialties %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">{{ specialty.name }}</td>
+                        <td class="text-muted">{{ specialty.description|default:"-"|truncatechars:80 }}</td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'specialty_update' specialty.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'specialty_delete' specialty.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <i class="bi bi-bookmark-star fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhuma especialidade cadastrada</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
