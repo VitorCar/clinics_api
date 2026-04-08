@@ -16,15 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import DashboardHomeView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('api/v1/', include('authentication.urls')),
-    path('api/v1/', include('accounts.urls')),
-    path('api/v1/', include('clinics.urls')),
-    path('api/v1/', include('consultations.urls')),
-    path('api/v1/', include('scheduling.urls')),
+    path('', DashboardHomeView.as_view(), name='dashboard-home'),
+
+    path('', include('authentication.urls')),
+    path('', include('accounts.urls')),
+    path('', include('clinics.urls')),
+    path('', include('consultations.urls')),
+    path('', include('scheduling.urls')),
     
     path('api/v1/', include('swagger.urls')),
 ]
