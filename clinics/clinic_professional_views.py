@@ -14,6 +14,7 @@ class ClinicProfessionalListView(ListView):
     model = ClinicProfessional
     template_name = 'clinic_professional_list.html'
     context_object_name = 'clinic_professionals'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related('clinic', 'professional__user').order_by('-start_date')

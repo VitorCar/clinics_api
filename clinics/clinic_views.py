@@ -14,6 +14,7 @@ class ClinicListView(ListView):
     model = Clinic
     template_name = 'clinic_list.html'
     context_object_name = 'clinics'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset().order_by('name')
