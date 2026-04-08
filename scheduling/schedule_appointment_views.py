@@ -15,6 +15,7 @@ class AppointmentListView(ListView):
     model = ScheduleAppointment
     template_name = 'appointment_list.html'
     context_object_name = 'appointments'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related(

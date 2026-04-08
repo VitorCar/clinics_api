@@ -12,7 +12,8 @@ from app.permissions import GlobalDefaultPermissions
 class ClinicScheduleListView(ListView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_list.html'
-    context_object_name = 'clinic_schedule' 
+    context_object_name = 'clinic_schedule'
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()
