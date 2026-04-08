@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Profissional - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2">
+        {% if object %}
+            <i class="bi bi-pencil-square text-info me-2"></i> Editar Profissional: {{ object.user.full_name }}
+        {% else %}
+            <i class="bi bi-person-badge text-info me-2"></i> Cadastrar Profissional
+        {% endif %}
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'professional_list' %}" class="btn btn-sm btn-outline-secondary shadow-sm"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-10">
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+                    
+                    <h5 class="text-primary mb-3"><i class="bi bi-person-vcard me-1"></i> Dados Pessoais</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label for="{{ form.user.id_for_label }}" class="form-label fw-bold">{{ form.user.label }}</label>
+                            {{ form.user }}
+                            <div class="text-danger small mt-1">{{ form.user.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.cpf.id_for_label }}" class="form-label fw-bold">{{ form.cpf.label }}</label>
+                            {{ form.cpf }}
+                            <div class="text-danger small mt-1">{{ form.cpf.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.rg.id_for_label }}" class="form-label fw-bold">{{ form.rg.label }}</label>
+                            {{ form.rg }}
+                            <div class="text-danger small mt-1">{{ form.rg.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-secondary">
+
+                    <h5 class="text-primary mb-3 mt-4"><i class="bi bi-briefcase-medical me-1"></i> Dados Profissionais</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="{{ form.board_number.id_for_label }}" class="form-label fw-bold">{{ form.board_number.label }}</label>
+                            {{ form.board_number }}
+                            <div class="text-danger small mt-1">{{ form.board_number.errors }}</div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="{{ form.state_of_issue_UF.id_for_label }}" class="form-label fw-bold">{{ form.state_of_issue_UF.label }}</label>
+                            {{ form.state_of_issue_UF }}
+                            <div class="text-danger small mt-1">{{ form.state_of_issue_UF.errors }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.specialty.id_for_label }}" class="form-label fw-bold">{{ form.specialty.label }}</label>
+                            {{ form.specialty }}
+                            <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Segure a tecla CTRL (ou CMD) para selecionar mais de uma opção.</div>
+                            <div class="text-danger small mt-1">{{ form.specialty.errors }}</div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <label for="{{ form.digital_signature.id_for_label }}" class="form-label fw-bold">{{ form.digital_signature.label }}</label>
+                            {{ form.digital_signature }}
+                            <div class="text-danger small mt-1">{{ form.digital_signature.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5 text-secondary">
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-info text-white px-4 shadow-sm fw-bold">
+                            <i class="bi bi-save me-1"></i> {% if object %}Atualizar Cadastro{% else %}Salvar Profissional{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuários - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-people text-success me-2"></i> Gerenciamento de Usuários</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'user_create' %}" class="btn btn-sm btn-success shadow-sm">
+            <i class="bi bi-person-plus me-1"></i> Novo Usuário
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar por Nome ou E-mail</label>
+                <input type="text" name="q" id="q" class="form-control form-control-sm" value="{{ request.GET.q }}">
+            </div>
+            <div class="col-md-4">
+                <label for="role" class="form-label small fw-bold text-secondary">Filtrar por Perfil</label>
+                <select name="role" id="role" class="form-select form-select-sm">
+                    <option value="">Todos os perfis</option>
+                    {% for value, label in roles %}
+                        <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-2 shadow-sm">Filtrar</button>
+                <a href="{% url 'user_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Usuário</th>
+                        <th>Perfil</th>
+                        <th>Status</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in usuarios %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ user.full_name|default:"Sem Nome" }}</div>
+                                    <div class="text-muted small">{{ user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
+                                {{ user.get_role_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="text-success small fw-bold"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Ativo</span>
+                            {% else %}
+                                <span class="text-danger small fw-bold"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'user_password' user.pk %}" class="btn btn-sm btn-light text-warning border me-1" title="Redefinir Senha">
+                                <i class="bi bi-key"></i>
+                            </a>   
+                            <a href="{% url 'user_update' user.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'user_delete' user.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Profissionais - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-heart-pulse text-info me-2"></i> Profissionais de Saúde</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'professional_create' %}" class="btn btn-sm btn-info text-white shadow-sm fw-bold">
+            <i class="bi bi-plus-circle me-1"></i> Cadastrar Profissional
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar por Nome, CPF ou Conselho</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: Dra. Ana, 123456 ou CRM 4455..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-2 shadow-sm">Pesquisar</button>
+                <a href="{% url 'professional_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Profissional</th>
+                        <th>Conselho</th>
+                        <th>Especialidades</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for professional in professionals %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ professional.user.full_name|default:"Sem Nome" }}</div>
+                            <div class="text-muted small">{{ professional.user.email }}</div>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-secondary">{{ professional.board_number }}</span>
+                            <span class="text-muted small">- {{ professional.state_of_issue_UF|upper }}</span>
+                        </td>
+                        <td>
+                            {% for spec in professional.specialty.all %}
+                                <span class="badge bg-info text-dark bg-opacity-25 border border-info">{{ spec.name }}</span>
+                            {% empty %}
+                                <span class="text-muted small">Clínico Geral</span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'professional_update' professional.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'professional_delete' professional.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-badge fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhum profissional cadastrado</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

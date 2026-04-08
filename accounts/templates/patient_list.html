@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Pacientes - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-person-hearts text-danger me-2"></i> Fichas de Pacientes</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'patient_create' %}" class="btn btn-sm btn-danger shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Nova Ficha
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar por Nome do Paciente ou CPF</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: João da Silva ou 12345678900..." value="{{ request.GET.q }}">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-primary w-100 me-2 shadow-sm">Pesquisar</button>
+                <a href="{% url 'patient_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">Paciente</th>
+                        <th>CPF</th>
+                        <th>Telefone</th>
+                        <th>Data Nasc.</th>
+                        <th class="text-center pe-4">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ patient.user.full_name|default:"Sem Nome" }}</div>
+                            <div class="text-muted small">{{ patient.user.email }}</div>
+                        </td>
+                        <td><span class="text-secondary font-monospace">{{ patient.cpf|default:"Não informado" }}</span></td>
+                        <td>{{ patient.phone }}</td>
+                        <td>{{ patient.birth_date|date:"d/m/Y"|default:"-" }}</td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'patient_update' user.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'patient_delete' user.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-folder2-open fs-1 d-block mb-3 text-secondary"></i>
+                            <h5 class="fw-normal">Nenhum paciente cadastrado</h5>
+                            <p class="mb-0">Cadastre um usuário primeiro, e depois crie a ficha do paciente.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

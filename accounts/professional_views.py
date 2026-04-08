@@ -1,10 +1,52 @@
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.db.models import Q
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from  .models import HealthcareProfessional
+from .models import HealthcareProfessional
+from .forms import HealthcareProfessionalForm
 from .serializers import ProfessionalSerializer, ProfessionalListSerializer
 from .utils import is_professional
 from app.permissions import GlobalDefaultPermissions
+
+
+class ProfessionalListView(ListView):
+    model = HealthcareProfessional
+    template_name = 'professional_list.html'
+    context_object_name = 'professionals'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('user').prefetch_related('specialty').order_by('-created_at')
+        
+        q = self.request.GET.get('q')
+        if q:
+            queryset = queryset.filter(
+                Q(user__full_name__icontains=q) | 
+                Q(cpf__icontains=q) |
+                Q(board_number__icontains=q)
+            )
+        return queryset
+    
+
+class ProfessionalCreateView(CreateView):
+    model = HealthcareProfessional
+    form_class = HealthcareProfessionalForm
+    template_name = 'professional_create.html'
+    success_url = reverse_lazy('professional_list')
+
+
+class ProfessionalUpdateView(UpdateView):
+    model = HealthcareProfessional
+    form_class = HealthcareProfessionalForm
+    template_name = 'professional_create.html'
+    success_url = reverse_lazy('professional_list')
+
+
+class ProfessionalDeleteView(DeleteView):
+    model = HealthcareProfessional
+    template_name = 'professional_delete.html'
+    success_url = reverse_lazy('professional_list')
 
 
 @extend_schema_view(
