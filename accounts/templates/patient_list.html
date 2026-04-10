@@ -55,8 +55,8 @@
                         <td>{{ patient.phone }}</td>
                         <td>{{ patient.birth_date|date:"d/m/Y"|default:"-" }}</td>
                         <td class="text-center pe-4">
-                            <a href="{% url 'patient_update' user.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'patient_delete' user.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                            <a href="{% url 'patient_update' patient.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'patient_delete' patient.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
                         </td>
                     </tr>
                     {% empty %}
