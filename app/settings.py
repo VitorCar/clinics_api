@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'clinics',
     'scheduling',
     'consultations',
+    'medicines_api',
 ]
 
 MIDDLEWARE = [

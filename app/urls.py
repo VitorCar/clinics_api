@@ -28,6 +28,7 @@ urlpatterns = [
     path('', include('clinics.urls')),
     path('', include('consultations.urls')),
     path('', include('scheduling.urls')),
+    path('', include('medicines_api.urls')),
     
     path('api/v1/', include('swagger.urls')),
 ]
