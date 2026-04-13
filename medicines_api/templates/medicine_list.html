@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Medicamentos - HealthCare{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2"><i class="bi bi-capsule-pill text-info me-2"></i> Bula Eletrônica e Medicamentos</h1>
+    <span class="badge bg-light text-dark border"><i class="bi bi-cloud-arrow-down me-1"></i> Sincronizado via Medicines-API</span>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body bg-light rounded">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-9">
+                <label for="q" class="form-label small fw-bold text-secondary">Buscar Medicamento (Nome ou Princípio Ativo)</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" id="q" class="form-control border-start-0" 
+                           placeholder="Ex: Paracetamol, Amoxicilina..." value="{{ query }}">
+                </div>
+            </div>
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-sm btn-info text-white w-100 me-2 shadow-sm fw-bold">Buscar na API</button>
+                <a href="{% url 'medicine_external_list' %}" class="btn btn-sm btn-outline-secondary w-100">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if api_error %}
+<div class="alert alert-danger shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Ops!</strong> {{ api_error }}
+</div>
+{% else %}
+
+<div class="card shadow-sm border-0 rounded-3 mb-5">
+    <div class="card-body p-4">
+        
+        <div class="accordion accordion-flush" id="medicinesAccordion">
+            
+            {% for medicine in medicines %}
+            <div class="accordion-item border rounded mb-3 shadow-sm">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                        <i class="bi bi-prescription me-2 text-info"></i> 
+                        {{ medicine.identificacao.nome_comercial }} 
+                        <span class="text-muted fw-normal ms-2 small">({{ medicine.identificacao.principio_ativo }})</span>
+                    </button>
+                </h2>
+                
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#medicinesAccordion">
+                    <div class="accordion-body bg-light p-4">
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-info-circle me-1"></i> Dados Gerais</h6>
+                                <p class="small mb-1"><strong>Apresentação:</strong> {{ medicine.identificacao.apresentacao }}</p>
+                                <p class="small mb-1"><strong>Concentração:</strong> {{ medicine.identificacao.concentracao }}</p>
+                                <p class="small mb-1"><strong>Tipo:</strong> <span class="badge bg-secondary">{{ medicine.farmacologia.tipo }}</span></p>
+                                <p class="small mb-1"><strong>Via de Administração:</strong> {{ medicine.farmacologia.vias_administracao }}</p>
+                                <p class="small mb-1"><strong>Forma:</strong> {{ medicine.farmacologia.formas_farmaceuticas }}</p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h6 class="text-danger border-bottom pb-2 mb-3"><i class="bi bi-shield-check me-1"></i> Segurança & Produção</h6>
+                                <p class="small mb-1"><strong>Prescrição:</strong> {{ medicine.seguranca.prescricao_obrigatoria|yesno:"Obrigatória,Livre" }}</p>
+                                <p class="small mb-1"><strong>Alerta Doping:</strong> {{ medicine.seguranca.alerta_doping|yesno:"Sim,Não" }}</p>
+                                <p class="small mb-1"><strong>Fabricante:</strong> {{ medicine.rastreabilidade.fabricante }}</p>
+                                <p class="small mb-1"><strong>Lote/Validade:</strong> {{ medicine.rastreabilidade.lote }} (Até: {{ medicine.rastreabilidade.validade|default:"-" }})</p>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <h6 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-heart-pulse me-1"></i> Informações Clínicas</h6>
+                                
+                                <div class="mb-3">
+                                    <strong class="small text-dark d-block mb-1">Indicações:</strong>
+                                    <span class="small text-muted">{{ medicine.clinica.indicacoes|default:"Não informado."|linebreaksbr }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="small text-dark d-block mb-1">Contraindicações:</strong>
+                                    <span class="small text-muted">{{ medicine.clinica.contraindicacoes|default:"Não informado."|linebreaksbr }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="small text-dark d-block mb-1">Reações Adversas:</strong>
+                                    <span class="small text-muted">{{ medicine.clinica.reacoes_adversas|default:"Não informado."|linebreaksbr }}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="small text-dark d-block mb-1">Armazenamento:</strong>
+                                    <span class="small text-muted">{{ medicine.seguranca.cuidados_armazenamento|default:"Não informado."|linebreaksbr }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-cloud-slash fs-1 d-block mb-3"></i>
+                <h5 class="fw-normal">Nenhum medicamento encontrado.</h5>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% include 'includes/pagination.html' %}
+
+{% endblock %}
