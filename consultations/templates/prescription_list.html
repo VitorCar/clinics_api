@@ -5,11 +5,13 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-capsule text-primary me-2"></i> Receitas e Prescrições</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'prescription_create' %}" class="btn btn-sm btn-primary shadow-sm fw-bold">
-            <i class="bi bi-plus-circle me-1"></i> Nova Prescrição
-        </a>
-    </div>
+    {% if perms.consultations.add_prescription %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'prescription_create' %}" class="btn btn-sm btn-primary shadow-sm fw-bold">
+                <i class="bi bi-plus-circle me-1"></i> Nova Prescrição
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
@@ -55,9 +57,17 @@
                         <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary">{{ prescricao.medicines_name }}</span></td>
                         <td class="text-secondary small">{{ prescricao.duration }}</td>
                         <td class="text-center pe-4">
-                            <a href="{% url 'prescription_detail' prescricao.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Visualizar / Imprimir Receita"><i class="bi bi-printer"></i></a>
-                            <a href="{% url 'prescription_update' prescricao.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'prescription_delete' prescricao.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                            {% if perms.consultations.view_prescription %}
+                                <a href="{% url 'prescription_detail' prescricao.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Visualizar / Imprimir Receita"><i class="bi bi-printer"></i></a>
+                            {% endif %}
+
+                            {% if perms.consultations.change_prescription %}
+                                <a href="{% url 'prescription_update' prescricao.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                            {% endif %}
+
+                            {% if perms.consultations.delete_prescription %}
+                                <a href="{% url 'prescription_delete' prescricao.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

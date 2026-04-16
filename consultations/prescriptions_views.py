@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -13,17 +14,27 @@ from accounts.utils import is_patient, is_professional
 from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
-class PrescriptionListView(ListView):
+class PrescriptionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Prescription
     template_name = 'prescription_list.html'
     context_object_name = 'prescriptions'
     paginate_by = 10
+    permission_required = 'consultations.view_prescription'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related(
             'consultation__appointment__patient__user',
             'consultation__appointment__professional__user'
         ).order_by('-created_at')
+
+        if user.role == 'PACIENTE':
+        # O paciente só vê receitas vinculadas ao perfil dele
+            queryset = queryset.filter(consultation__appointment__patient__user=user)
+    
+        elif user.role == 'PROFISSIONAL':
+            # O médico só vê as receitas que ele mesmo prescreveu
+            queryset = queryset.filter(consultation__appointment__professional__user=user)
         
         q = self.request.GET.get('q')
 
@@ -36,30 +47,46 @@ class PrescriptionListView(ListView):
         return queryset
 
 
-class PrescriptionCreateView(CreateView):
+class PrescriptionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Prescription
     form_class = PrescriptionForm
     template_name = 'prescription_create.html'
     success_url = reverse_lazy('prescription_list')
+    permission_required = 'consultations.add_prescription'
 
 
-class PrescriptionUpdateView(UpdateView):
+class PrescriptionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Prescription
     form_class = PrescriptionForm
     template_name = 'prescription_create.html'
     success_url = reverse_lazy('prescription_list')
+    permission_required = 'consultations.change_prescription'
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        if user.role == 'PROFISSIONAL':
+            return queryset.filter(consultation__appointment__professional__user=user)
+        
+        if user.role == 'PACIENTE':
+            return queryset.none()
+
+        return queryset
 
 
-class PrescriptionDeleteView(DeleteView):
+class PrescriptionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Prescription
     template_name = 'prescription_delete.html'
     success_url = reverse_lazy('prescription_list')
+    permission_required = 'consultations.delete_prescription'
 
 
-class PrescriptionDetailView(DetailView):
+class PrescriptionDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Prescription
     template_name = 'prescription_detail.html'
     context_object_name = 'prescription'
+    permission_required = 'consultations.view_prescription'
 
     def get_queryset(self):
         return super().get_queryset().select_related(

@@ -5,11 +5,13 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-journal-medical text-success me-2"></i> Prontuários e Consultas</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'consultation_create' %}" class="btn btn-sm btn-success shadow-sm fw-bold">
-            <i class="bi bi-plus-circle me-1"></i> Registrar Atendimento
-        </a>
-    </div>
+    {% if perms.consultations.add_consultation %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'consultation_create' %}" class="btn btn-sm btn-success shadow-sm fw-bold">
+                <i class="bi bi-plus-circle me-1"></i> Registrar Atendimento
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
@@ -77,12 +79,19 @@
                             {% endif %}
                         </td>
                        <td class="text-center pe-4">
-                            <a href="{% url 'consultation_detail' consulta.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Ver Detalhes">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            
-                            <a href="{% url 'consultation_update' consulta.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'consultation_delete' consulta.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                            {% if perms.consultations.view_consultation %}
+                                <a href="{% url 'consultation_detail' consulta.pk %}" class="btn btn-sm btn-light text-info border me-1" title="Ver Detalhes">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            {% endif %}
+
+                            {% if perms.consultations.change_consultation %}
+                                <a href="{% url 'consultation_update' consulta.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
+                            {% endif %}
+
+                            {% if perms.consultations.delete_consultation %}
+                                <a href="{% url 'consultation_delete' consulta.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -13,18 +14,28 @@ from accounts.utils import is_patient, is_professional
 from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
-class ConsultationListView(ListView):
+class ConsultationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Consultation
     template_name = 'consultation_list.html'
     context_object_name = 'consultations'
     paginate_by = 10
+    permission_required = 'consultations.view_consultation'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related(
             'appointment',
             'appointment__patient__user',
             'appointment__professional__user'
         ).order_by('-created_at')
+
+        if user.role == 'PACIENTE':
+            # Filtra através do agendamento vinculado ao prontuário
+            return queryset.filter(appointment__patient__user=user)
+        
+        elif user.role == 'PROFISSIONAL':
+            # Filtra prontuários criados por este médico
+            return queryset.filter(appointment__professional__user=user)
         
         q = self.request.GET.get('q')
         status_filter = self.request.GET.get('status')
@@ -46,17 +57,19 @@ class ConsultationListView(ListView):
         return context
 
 
-class ConsultationCreateView(CreateView):
+class ConsultationCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Consultation
     form_class = ConsultationForm
     template_name = 'consultation_create.html'
     success_url = reverse_lazy('consultation_list')
+    permission_required = 'consultations.add_consultation'
 
 
-class ConsultationDetailView(DetailView):
+class ConsultationDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = Consultation
     template_name = 'consultation_detail.html'
     context_object_name = 'consulta'
+    permission_required = 'consultations.view_consultation'
 
     def get_queryset(self):
         return super().get_queryset().select_related(
@@ -66,18 +79,31 @@ class ConsultationDetailView(DetailView):
         )
 
 
-class ConsultationUpdateView(UpdateView):
+class ConsultationUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Consultation
     form_class = ConsultationForm
     template_name = 'consultation_create.html'
     success_url = reverse_lazy('consultation_list')
+    permission_required = 'consultations.change_consultation'
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        if user.role == 'PROFISSIONAL':
+            return queryset.filter(appointment__professional__user=user)
+        
+        if user.role == 'PACIENTE':
+            return queryset.none()
+
+        return queryset
 
 
-class ConsultationDeleteView(DeleteView):
+class ConsultationDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Consultation
     template_name = 'consultation_delete.html'
     success_url = reverse_lazy('consultation_list')
-
+    permission_required = 'consultations.delete_consultation'
 
 
 @extend_schema_view(
