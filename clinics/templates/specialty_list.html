@@ -5,11 +5,13 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-award text-success me-2"></i> Especialidades Médicas</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'specialty_create' %}" class="btn btn-sm btn-success shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> Nova Especialidade
-        </a>
-    </div>
+    {% if perms.clinics.add_specialty %}
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'specialty_create' %}" class="btn btn-sm btn-success shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Nova Especialidade
+            </a>
+        </div>
+    {% endif %}
 </div>
 
 <div class="card shadow-sm border-0 mb-4">
@@ -48,8 +50,13 @@
                         <td class="ps-4 fw-bold text-dark">{{ specialty.name }}</td>
                         <td class="text-muted">{{ specialty.description|default:"-"|truncatechars:80 }}</td>
                         <td class="text-center pe-4">
-                            <a href="{% url 'specialty_update' specialty.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
-                            <a href="{% url 'specialty_delete' specialty.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                            {% if perms.clinics.change_specialty %}
+                                <a href="{% url 'specialty_update' specialty.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
+                            {% endif %}
+
+                            {% if perms.clinics.delete_specialty %}
+                                <a href="{% url 'specialty_delete' specialty.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}

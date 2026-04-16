@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -10,11 +11,12 @@ from .serializers import ClinicSerializers
 from app.permissions import GlobalDefaultPermissions
 
 
-class ClinicListView(ListView):
+class ClinicListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Clinic
     template_name = 'clinic_list.html'
     context_object_name = 'clinics'
     paginate_by = 10
+    permission_required = 'clinics.view_clinic'
 
     def get_queryset(self):
         queryset = super().get_queryset().order_by('name')
@@ -36,24 +38,27 @@ class ClinicListView(ListView):
         return context
 
 
-class ClinicCreateView(CreateView):
+class ClinicCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Clinic
     form_class = ClinicForm
     template_name = 'clinic_create.html'
     success_url = reverse_lazy('clinic_list')
+    permission_required = 'clinics.add_clinic'
 
 
-class ClinicUpdateView(UpdateView):
+class ClinicUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Clinic
     form_class = ClinicForm
     template_name = 'clinic_create.html'
     success_url = reverse_lazy('clinic_list')
+    permission_required = 'clinics.change_clinic'
 
 
-class ClinicDeleteView(DeleteView):
+class ClinicDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Clinic
     template_name = 'clinic_delete.html'
     success_url = reverse_lazy('clinic_list')
+    permission_required = 'clinics.delete_clinic'
 
 
 @extend_schema_view(

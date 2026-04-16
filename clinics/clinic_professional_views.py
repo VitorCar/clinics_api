@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -10,11 +11,12 @@ from .serializers import ClinicProfessionalSerializers, ClinicProfessionalListSe
 from app.permissions import GlobalDefaultPermissions
 
 
-class ClinicProfessionalListView(ListView):
+class ClinicProfessionalListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = ClinicProfessional
     template_name = 'clinic_professional_list.html'
     context_object_name = 'clinic_professionals'
     paginate_by = 10
+    permission_required = 'clinics.view_clinicprofessional'
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related('clinic', 'professional__user').order_by('-start_date')
@@ -36,24 +38,27 @@ class ClinicProfessionalListView(ListView):
         return queryset
 
 
-class ClinicProfessionalCreateView(CreateView):
+class ClinicProfessionalCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = ClinicProfessional
     form_class = ClinicProfessionalForm
     template_name = 'clinic_professional_create.html'
     success_url = reverse_lazy('clinic_professional_list')
+    permission_required = 'clinics.add_clinicprofessional'
 
 
-class ClinicProfessionalUpdateView(UpdateView):
+class ClinicProfessionalUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = ClinicProfessional
     form_class = ClinicProfessionalForm
     template_name = 'clinic_professional_create.html'
     success_url = reverse_lazy('clinic_professional_list')
+    permission_required = 'clinics.change_clinicprofessional'
 
 
-class ClinicProfessionalDeleteView(DeleteView):
+class ClinicProfessionalDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = ClinicProfessional
     template_name = 'clinic_professional_delete.html'
     success_url = reverse_lazy('clinic_professional_list')
+    permission_required = 'clinics.delete_clinicprofessional'
 
 
 @extend_schema_view(

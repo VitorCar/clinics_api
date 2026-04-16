@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -10,11 +11,12 @@ from .serializers import SpecialtySerializers
 from app.permissions import GlobalDefaultPermissions
 
 
-class SpecialtyListView(ListView):
+class SpecialtyListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Specialty
     template_name = 'specialty_list.html'
     context_object_name = 'specialties'
     paginate_by = 10
+    permission_required = 'clinics.view_specialty'
 
     def get_queryset(self):
         queryset = super().get_queryset().order_by('name')
@@ -26,24 +28,27 @@ class SpecialtyListView(ListView):
         return queryset
 
 
-class SpecialtyCreateView(CreateView):
+class SpecialtyCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Specialty
     form_class = SpecialtyForm
     template_name = 'specialty_create.html'
     success_url = reverse_lazy('specialty_list')
+    permission_required = 'clinics.add_specialty'
 
 
-class SpecialtyUpdateView(UpdateView):
+class SpecialtyUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Specialty
     form_class = SpecialtyForm
     template_name = 'specialty_create.html'
     success_url = reverse_lazy('specialty_list')
+    permission_required = 'clinics.change_specialty'
 
 
-class SpecialtyDeleteView(DeleteView):
+class SpecialtyDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Specialty
     template_name = 'specialty_delete.html'
     success_url = reverse_lazy('specialty_list')
+    permission_required = 'clinics.delete_specialty'
 
 
 @extend_schema_view(
