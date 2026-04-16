@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -9,11 +10,12 @@ from .serializers import ClinicScheduleSerializers, ClinicScheduleListSerializer
 from app.permissions import GlobalDefaultPermissions
 
 
-class ClinicScheduleListView(ListView):
+class ClinicScheduleListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_list.html'
     context_object_name = 'clinic_schedule'
     paginate_by = 10
+    permission_required = 'scheduling.view_clinicschedule'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -35,24 +37,27 @@ class ClinicScheduleListView(ListView):
         return context
 
 
-class ClinicScheduleCreateView(CreateView):
+class ClinicScheduleCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_create.html'
     form_class = ClinicScheduleForm
     success_url = reverse_lazy('clinic_schedule_list')
+    permission_required = 'scheduling.add_clinicschedule'
 
 
-class ClinicScheduleUpdateView(UpdateView):
+class ClinicScheduleUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = ClinicSchedule
     form_class = ClinicScheduleForm
     template_name = 'clinic_schedule_create.html' 
     success_url = reverse_lazy('clinic_schedule_list')
+    permission_required = 'scheduling.change_clinicschedule'
 
 
-class ClinicScheduleDeleteView(DeleteView):
+class ClinicScheduleDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_delete.html'
     success_url = reverse_lazy('clinic_schedule_list')
+    permission_required = 'scheduling.delete_clinicschedule'
 
 
 @extend_schema_view(

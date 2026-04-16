@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -11,18 +12,28 @@ from accounts.utils import is_professional, is_patient
 from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
-class AppointmentListView(ListView):
+class AppointmentListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = ScheduleAppointment
     template_name = 'appointment_list.html'
     context_object_name = 'appointments'
     paginate_by = 10
+    permission_required = 'scheduling.view_scheduleappointment'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related(
             'patient__user', 
             'professional__user', 
             'clinic'
         ).order_by('-scheduled_date', '-scheduled_time')
+
+        if user.role == 'PACIENTE':
+            # O paciente só vê os agendamentos onde ele é o dono
+            return queryset.filter(patient__user=user)
+        
+        elif user.role == 'PROFISSIONAL':
+            # O médico só vê os agendamentos marcados para ele
+            return queryset.filter(professional__user=user)
         
         q = self.request.GET.get('q')
         date_filter = self.request.GET.get('date')
@@ -48,24 +59,35 @@ class AppointmentListView(ListView):
         return context
 
 
-class AppointmentCreateView(CreateView):
+class AppointmentCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = ScheduleAppointment
     form_class = ScheduleAppointmentForm
     template_name = 'appointment_create.html'
     success_url = reverse_lazy('schedule_appointments_list')
+    permission_required = 'scheduling.add_scheduleappointment'
 
 
-class AppointmentUpdateView(UpdateView):
+class AppointmentUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = ScheduleAppointment
     form_class = ScheduleAppointmentForm
     template_name = 'appointment_create.html'
     success_url = reverse_lazy('schedule_appointments_list')
+    permission_required = 'scheduling.change_scheduleappointment'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'PACIENTE':
+            return ScheduleAppointment.objects.filter(patient__user=user)
+        elif user.role == 'PROFISSIONAL':
+            return ScheduleAppointment.objects.filter(professional__user=user)
+        return ScheduleAppointment.objects.all()
 
 
-class AppointmentDetailView(DetailView):
+class AppointmentDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = ScheduleAppointment
     template_name = 'appointment_detail.html'
     context_object_name = 'appointment'
+    permission_required = 'scheduling.view_scheduleappointment'
 
     def get_queryset(self):
         return super().get_queryset().select_related(
@@ -75,10 +97,11 @@ class AppointmentDetailView(DetailView):
         )
 
 
-class AppointmentDeleteView(DeleteView):
+class AppointmentDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = ScheduleAppointment
     template_name = 'appointment_delete.html'
     success_url = reverse_lazy('schedule_appointments_list')
+    permission_required = 'scheduling.delete_scheduleappointment'
 
 
 @extend_schema_view(

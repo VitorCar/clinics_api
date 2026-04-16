@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -9,11 +10,12 @@ from .serializers import ClinicHolidaySerializers, ClinicHolidayListSerializer
 from app.permissions import GlobalDefaultPermissions
 
 
-class ClinicHolidayListView(ListView):
+class ClinicHolidayListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = ClinicHoliday
     template_name = 'clinic_holiday_list.html'
     context_object_name = 'clinic_holidays'
     paginate_by = 10
+    permission_required = 'scheduling.view_clinicholiday'
 
     def get_queryset(self):
         queryset = super().get_queryset().order_by('date') 
@@ -29,24 +31,27 @@ class ClinicHolidayListView(ListView):
         return queryset
 
 
-class ClinicHolidayCreateView(CreateView):
+class ClinicHolidayCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = ClinicHoliday
     form_class = ClinicHolidayForm
     template_name = 'clinic_holiday_create.html'
     success_url = reverse_lazy('clinic_holiday_list')
+    permission_required = 'scheduling.add_clinicholiday'
 
 
-class ClinicHolidayUpdateView(UpdateView):
+class ClinicHolidayUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = ClinicHoliday
     form_class = ClinicHolidayForm
     template_name = 'clinic_holiday_create.html'
     success_url = reverse_lazy('clinic_holiday_list')
+    permission_required = 'scheduling.change_clinicholiday'
 
 
-class ClinicHolidayDeleteView(DeleteView):
+class ClinicHolidayDeleteView(LoginRequiredMixin,PermissionRequiredMixin, DeleteView):
     model = ClinicHoliday
     template_name = 'clinic_holiday_delete.html'
     success_url = reverse_lazy('clinic_holiday_list')
+    permission_required = 'scheduling.delete_clinicholiday'
 
 
 @extend_schema_view(
