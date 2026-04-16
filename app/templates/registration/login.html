@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Acesso ao Sistema - HealthCare{% endblock %}
+
+{% block content %}
+<div class="container mb-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
+        <div class="col-md-5 col-lg-4">
+            
+            <div class="card shadow-lg border-0 rounded-4">
+                
+                <div class="card-header bg-dark text-center pt-4 pb-3 border-0 rounded-top-4">
+                    <h3 class="text-white fw-bold mb-0">
+                        <i class="bi bi-heart-pulse-fill text-danger me-1"></i> HealthCare
+                    </h3>
+                    <p class="text-white-50 small mt-1 mb-0">Painel Administrativo</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <h5 class="text-center fw-semibold text-dark mb-4">Acesse sua conta</h5>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control {% if form.errors %}is-invalid{% endif %}" id="email" name="username" placeholder="nome@exemplo.com" required autocomplete="email">
+                            <label for="email" class="text-muted"><i class="bi bi-envelope me-1"></i> E-mail de Usuário</label>
+                        </div>
+                        
+                        <div class="form-floating mb-4">
+                            <input type="password" class="form-control {% if form.errors %}is-invalid{% endif %}" id="password" name="password" placeholder="Senha" required autocomplete="current-password">
+                            <label for="password" class="text-muted"><i class="bi bi-lock me-1"></i> Senha</label>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                Entrar no Sistema <i class="bi bi-box-arrow-in-right ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger mt-4 border-0 border-start border-4 border-danger shadow-sm d-flex align-items-center p-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 text-danger me-3"></i>
+                            <div class="small fw-semibold text-danger">
+                                Credenciais inválidas. Verifique seu e-mail e senha e tente novamente.
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                </div>
+            </div>
+            
+            <div class="text-center mt-4 text-muted small">
+                &copy; {% now "Y" %} HealthCare System. Todos os direitos reservados.
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa; 
+    }
+</style>
+{% endblock %}

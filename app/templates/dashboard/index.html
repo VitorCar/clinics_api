@@ -4,85 +4,105 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2"><i class="bi bi-house-door text-primary me-2"></i> Visão Geral</h1>
-    <div class="text-muted fw-bold">
+    <h1 class="h2">
+        {% if user.role == 'ADMIN' %}
+            <i class="bi bi-shield-check text-primary me-2"></i> Administração Geral
+        {% elif user.role == 'PROFISSIONAL' %}
+            <i class="bi bi-stethoscope text-info me-2"></i> Meus Atendimentos
+        {% else %}
+            <i class="bi bi-person-hearts text-danger me-2"></i> Minha Área
+        {% endif %}
+    </h1>
+    <div class="text-muted fw-bold small">
         <i class="bi bi-calendar-event me-1"></i> {% now "d \d\e F \d\e Y" %}
     </div>
 </div>
 
 <div class="row g-4 mb-5">
     
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="card shadow-sm border-0 bg-primary text-white h-100 rounded-3">
             <div class="card-body p-4 d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-calendar-day fs-1 opacity-75"></i>
-                </div>
+                <div class="me-3"><i class="bi bi-calendar-check fs-1 opacity-75"></i></div>
                 <div>
-                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">Consultas Hoje</h6>
-                    <h2 class="mb-0 fw-bold">{{ agendamentos_hoje_count }}</h2>
+                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">
+                        {% if user.role == 'PACIENTE' %}Meus Agendamentos{% else %}Consultas Hoje{% endif %}
+                    </h6>
+                    <h2 class="mb-0 fw-bold">
+                        {% if user.role == 'PACIENTE' %}
+                            {{ meus_agendamentos_count|default:"0" }}
+                        {% else %}
+                            {{ agendamentos_hoje_count|default:"0" }}
+                        {% endif %}
+                    </h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
+    {% if user.role != 'PACIENTE' %}
+    
+    <div class="col-md-4">
         <div class="card shadow-sm border-0 bg-danger text-white h-100 rounded-3">
             <div class="card-body p-4 d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-person-hearts fs-1 opacity-75"></i>
-                </div>
+                <div class="me-3"><i class="bi bi-people fs-1 opacity-75"></i></div>
                 <div>
-                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">Total de Pacientes</h6>
-                    <h2 class="mb-0 fw-bold">{{ total_pacientes }}</h2>
+                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">
+                        {% if user.role == 'ADMIN' %}Total Pacientes{% else %}Seus Pacientes{% endif %}
+                    </h6>
+                    <h2 class="mb-0 fw-bold">
+                        {% if user.role == 'ADMIN' %}
+                            {{ total_pacientes|default:"0" }}
+                        {% else %}
+                            {{ seus_pacientes_count|default:"0" }}
+                        {% endif %}
+                    </h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card shadow-sm border-0 bg-info text-white h-100 rounded-3">
-            <div class="card-body p-4 d-flex align-items-center">
-                <div class="me-3">
-                    <i class="bi bi-person-badge fs-1 opacity-75"></i>
-                </div>
-                <div>
-                    <h6 class="text-uppercase fw-bold text-dark opacity-75 mb-1">Profissionais</h6>
-                    <h2 class="mb-0 fw-bold text-dark">{{ total_profissionais }}</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
+    <div class="col-md-4">
         <div class="card shadow-sm border-0 bg-dark text-white h-100 rounded-3">
             <div class="card-body p-4 d-flex align-items-center">
                 <div class="me-3">
-                    <i class="bi bi-hospital fs-1 opacity-75"></i>
+                    {% if user.role == 'ADMIN' %}<i class="bi bi-hospital fs-1 opacity-75"></i>{% else %}<i class="bi bi-building fs-1 opacity-75"></i>{% endif %}
                 </div>
                 <div>
-                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">Clínicas Ativas</h6>
-                    <h2 class="mb-0 fw-bold">{{ clinicas_ativas }}</h2>
+                    <h6 class="text-uppercase fw-bold opacity-75 mb-1">
+                        {% if user.role == 'ADMIN' %}Clínicas Ativas{% else %}Suas Clínicas{% endif %}
+                    </h6>
+                    <h2 class="mb-0 fw-bold">
+                        {% if user.role == 'ADMIN' %}
+                            {{ clinicas_ativas|default:"0" }}
+                        {% else %}
+                            {{ minhas_clinicas_count|default:"0" }}
+                        {% endif %}
+                    </h2>
                 </div>
             </div>
         </div>
     </div>
+    
+    {% endif %}
 </div>
 
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
-        <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-list-check me-2"></i> Agendamentos de Hoje</h5>
-        <a href="{% url 'schedule_appointments_list' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-white py-3 border-bottom-0">
+        <h5 class="mb-0 text-primary fw-bold">
+            <i class="bi bi-clock-history me-2"></i> 
+            {% if user.role == 'PACIENTE' %}Próximas Consultas{% else %}Fila de Atendimento - Hoje{% endif %}
+        </h5>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light text-muted small text-uppercase">
                     <tr>
-                        <th class="ps-4">Horário</th>
-                        <th>Paciente</th>
-                        <th>Profissional</th>
-                        <th>Clínica</th>
+                        <th class="ps-4">Data/Hora</th>
+                        {% if user.role != 'PACIENTE' %}<th>Paciente</th>{% endif %}
+                        {% if user.role != 'PROFISSIONAL' %}<th>Médico</th>{% endif %}
+                        <th>Local</th>
                         <th>Status</th>
                         <th class="text-center pe-4">Ação</th>
                     </tr>
@@ -90,35 +110,32 @@
                 <tbody>
                     {% for agenda in proximos_agendamentos %}
                     <tr>
-                        <td class="ps-4 fw-bold text-primary fs-5">{{ agenda.scheduled_time|time:"H:i" }}</td>
-                        <td>
-                            <div class="fw-bold text-dark">{{ agenda.patient.user.full_name }}</div>
-                            <div class="small text-muted">{{ agenda.patient.phone }}</div>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ agenda.scheduled_date|date:"d/m/Y" }}</div>
+                            <div class="text-primary small">{{ agenda.scheduled_time|time:"H:i" }}</div>
                         </td>
-                        <td class="text-dark"><i class="bi bi-person-badge text-muted me-1"></i> {{ agenda.professional.user.full_name }}</td>
-                        <td class="text-muted small">{{ agenda.clinic.name }}</td>
+                        {% if user.role != 'PACIENTE' %}
                         <td>
-                            {% if agenda.status == 'AGENDADO' %}
-                                <span class="badge bg-primary rounded-pill">Agendado</span>
-                            {% elif agenda.status == 'CONFIRMADO' %}
-                                <span class="badge bg-info text-dark rounded-pill">Confirmado</span>
-                            {% elif agenda.status == 'CONCLUIDO' %}
-                                <span class="badge bg-success rounded-pill">Concluído</span>
-                            {% else %}
-                                <span class="badge bg-secondary rounded-pill">{{ agenda.status }}</span>
-                            {% endif %}
+                            <div class="fw-bold">{{ agenda.patient.user.full_name }}</div>
+                            <div class="text-muted small">CPF: {{ agenda.patient.cpf }}</div>
+                        </td>
+                        {% endif %}
+                        {% if user.role != 'PROFISSIONAL' %}
+                        <td>{{ agenda.professional.user.full_name }}</td>
+                        {% endif %}
+                        <td class="small">{{ agenda.clinic.name }}</td>
+                        <td>
+                            <span class="badge {% if agenda.status == 'CONCLUIDO' %}bg-success{% else %}bg-primary{% endif %} rounded-pill">
+                                {{ agenda.get_status_display }}
+                            </span>
                         </td>
                         <td class="text-center pe-4">
-                            <a href="{% url 'schedule_appointments_detail' agenda.pk %}" class="btn btn-sm btn-light border text-primary">Abrir</a>
+                            <a href="{% url 'schedule_appointments_detail' agenda.pk %}" class="btn btn-sm btn-light border text-primary">Detalhes</a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-cup-hot fs-1 d-block mb-3 opacity-50"></i>
-                            <h5 class="fw-normal">Nenhuma consulta agendada para hoje.</h5>
-                            <p class="small">Aproveite para organizar a clínica!</p>
-                        </td>
+                        <td colspan="6" class="text-center py-5 text-muted">Nenhum compromisso encontrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
