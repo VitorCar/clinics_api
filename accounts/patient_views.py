@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Q
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -11,14 +12,24 @@ from .utils import is_patient
 from app.permissions import GlobalDefaultPermissions
 
 
-class PatientListView(ListView):
+class PatientListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Patients
     template_name = 'patient_list.html'
     context_object_name = 'patients'
     paginate_by = 10
+    permission_required = 'accounts.view_patients'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related('user').order_by('-created_at')
+
+        if user.role == 'PACIENTE':
+            # O paciente só vê os agendamentos onde ele é o dono
+            return queryset.filter(user=user)
+        
+        elif user.role == 'PROFISSIONAL':
+            # O médico só vê os agendamentos marcados para ele
+            return queryset
         
         q = self.request.GET.get('q')
         if q:
@@ -27,24 +38,35 @@ class PatientListView(ListView):
         return queryset
 
 
-class PatientCreateView(CreateView):
+class PatientCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Patients
     form_class = PatientForm
     template_name = 'patient_create.html'
     success_url = reverse_lazy('patient_list')
+    permission_required = 'accounts.add_patients'
 
 
-class PatientUpdateView(UpdateView):
+class PatientUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Patients
     form_class = PatientForm
     template_name = 'patient_create.html'
     success_url = reverse_lazy('patient_list')
+    permission_required = 'accounts.change_patients'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'PACIENTE':
+            return Patients.objects.filter(patient__user=user)
+        elif user.role == 'PROFISSIONAL':
+            return Patients.objects.filter(professional__user=user)
+        return Patients.objects.all()
 
 
-class PatientDeleteView(DeleteView):
+class PatientDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Patients
     template_name = 'patient_delete.html'
     success_url = reverse_lazy('patient_list')
+    permission_required = 'accounts.delete_patients'
 
 
 @extend_schema_view(

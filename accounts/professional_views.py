@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -11,15 +12,25 @@ from .utils import is_professional
 from app.permissions import GlobalDefaultPermissions
 
 
-class ProfessionalListView(ListView):
+class ProfessionalListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = HealthcareProfessional
     template_name = 'professional_list.html'
     context_object_name = 'professionals'
     paginate_by = 10
+    permission_required = 'accounts.view_healthcareprofessional'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related('user').prefetch_related('specialty').order_by('-created_at')
         
+        if user.role == 'PACIENTE':
+            # O paciente só vê os agendamentos onde ele é o dono
+            return queryset
+        
+        elif user.role == 'PROFISSIONAL':
+            # O médico só vê os agendamentos marcados para ele
+            return queryset.filter(user=user)
+
         q = self.request.GET.get('q')
         if q:
             queryset = queryset.filter(
@@ -30,24 +41,36 @@ class ProfessionalListView(ListView):
         return queryset
     
 
-class ProfessionalCreateView(CreateView):
+class ProfessionalCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = HealthcareProfessional
     form_class = HealthcareProfessionalForm
     template_name = 'professional_create.html'
     success_url = reverse_lazy('professional_list')
+    permission_required = 'accounts.add_healthcareprofessional'
 
 
-class ProfessionalUpdateView(UpdateView):
+class ProfessionalUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = HealthcareProfessional
     form_class = HealthcareProfessionalForm
     template_name = 'professional_create.html'
     success_url = reverse_lazy('professional_list')
+    permission_required = 'accounts.change_healthcareprofessional'
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        if user.role == 'PROFISSIONAL':
+            return queryset.filter(user=user)
+        
+        return queryset
 
 
-class ProfessionalDeleteView(DeleteView):
+class ProfessionalDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = HealthcareProfessional
     template_name = 'professional_delete.html'
     success_url = reverse_lazy('professional_list')
+    permission_required = 'accounts.delete_healthcareprofessional'
 
 
 @extend_schema_view(

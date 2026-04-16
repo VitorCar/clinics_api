@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.shortcuts import get_object_or_404, render, redirect
@@ -11,14 +12,25 @@ from .forms import CustomUsuarioCreationForm, CustomUsuarioChangeForm, CustomSet
 from .serializers import UserSerializer, UserListSerializer
 
 
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin, PermissionRequiredMixin,ListView):
     model = CustomUsuario
     template_name = 'user_list.html'
     context_object_name = 'usuarios'
     paginate_by = 10
+    # Qual a permissão que o usuaro tem que ter para pode acessar esta rota 
+    permission_required = 'accounts.view_customusuario' # Seque um padrão nomedaapp.açãodapermissão_nomedomodel(minusculo)
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().order_by('-date_joined')
+
+        if user.role == 'PACIENTE':
+            # O paciente só vê os agendamentos onde ele é o dono
+            return queryset.filter(patient__user=user)
+        
+        elif user.role == 'PROFISSIONAL':
+            # O médico só vê os agendamentos marcados para ele
+            return queryset.filter(professional__user=user)
         
         q = self.request.GET.get('q')
         role_filter = self.request.GET.get('role')
@@ -36,22 +48,34 @@ class UserListView(ListView):
         return context
     
 
-class UserCreateView(CreateView):
+class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = CustomUsuario
     form_class = CustomUsuarioCreationForm
     template_name = 'user_create.html'
     success_url = reverse_lazy('user_list')
+    permission_required = 'accounts.add_customusuario'
 
 
-class UserUpdateView(UpdateView):
+class UserUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = CustomUsuario
     form_class = CustomUsuarioChangeForm
     template_name = 'user_create.html'
     success_url = reverse_lazy('user_list')
+    permission_required = 'accounts.change_customusuario'
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = super().get_queryset()
+
+        if not user.is_superuser:
+            return queryset.filter(id=user.id)
+            
+        return queryset
 
 
 class UserPasswordView(View):
     template_name = 'user_password.html'
+    permission_required = 'accounts.change_customusuario'
 
     def get(self, request, pk):
         user = get_object_or_404(CustomUsuario, pk=pk)
@@ -69,10 +93,11 @@ class UserPasswordView(View):
         return render(request, self.template_name, {'form': form, 'usuario_alvo': user})
 
 
-class UserDeleteView(DeleteView):
+class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = CustomUsuario
     template_name = 'user_delete.html'
     success_url = reverse_lazy('user_list')
+    permission_required = 'accounts.delete_customusuario'
 
 
 @extend_schema_view(
