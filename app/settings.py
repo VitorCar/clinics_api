@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,6 +50,8 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     'swagger',
+    'django_celery_results',
+    'django_celery_beat',
 
     'authentication',
     'accounts',
@@ -53,6 +59,7 @@ INSTALLED_APPS = [
     'scheduling',
     'consultations',
     'medicines_api',
+    'send_email',
 ]
 
 MIDDLEWARE = [
@@ -199,3 +206,22 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "America/Sao_Paulo"
+# Configurar o RabbitMQ como o intermediário (broker) de mensagens do projeto.
+#CELERY_BROKER_URL= 'pyamqp://guest@localhost//'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# Ativa o banco de dados do Django para salvar os resultados
+CELERY_RESULT_BACKEND = 'django-db'
+
+
+# Enviar Email em produção
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'# Produçao
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
