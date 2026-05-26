@@ -39,7 +39,7 @@ class CustomUsuarioCreationForm(forms.ModelForm):
 
     class Meta:
         model = CustomUsuario
-        fields = ['email', 'full_name', 'role', 'is_active', 'is_staff']
+        fields = ['email', 'full_name', 'role', 'is_active', 'is_staff', 'password']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'exemplo@email.com'}),
             'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome completo'}),

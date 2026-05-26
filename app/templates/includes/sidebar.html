@@ -79,11 +79,13 @@
                 </li>
             {% endif %}
 
-            <li class="nav-item">
-                <a class="nav-link text-white-50" href="{% url 'medicine_external_list' %}">
-                    <i class="bi bi-capsule-pill me-2"></i> Bulário (Medicines API)
-                </a>
-            </li>
+            {% if user.role == 'ADMIN' or user.role == 'PROFISSIONAL' %}   
+                <li class="nav-item">
+                    <a class="nav-link text-white-50" href="{% url 'medicine_external_list' %}">
+                        <i class="bi bi-capsule-pill me-2"></i> Bulário (Medicines API)
+                    </a>
+                </li>
+            {% endif %}
         </ul>
 
         <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-secondary text-uppercase small fw-bold">

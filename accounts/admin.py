@@ -74,8 +74,7 @@ class CustomUsuarioAdmin(UserAdmin):
                 'email',
                 'full_name',
                 'role',
-                'password1',
-                'password2',
+                'password',
                 'is_staff',
                 'is_active'
             ),

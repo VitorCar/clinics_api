@@ -1,12 +1,12 @@
 from django.views.generic import TemplateView
 from django.utils import timezone
-from django.db.models import Count
+from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.models import Patients, HealthcareProfessional
 from clinics.models import Clinic
 from scheduling.models import ScheduleAppointment
 
 
-class DashboardHomeView(TemplateView):
+class DashboardHomeView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/index.html'
 
     def get_context_data(self, **kwargs):

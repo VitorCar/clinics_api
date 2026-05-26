@@ -1,7 +1,10 @@
 import os
 import requests
 from dotenv import load_dotenv
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.core.cache import cache
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -36,7 +39,7 @@ class MedicineApiService:
         tags=['Medicamentos Externos']
     )
 class GetMedicinesFixedView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     def __init__(self, **kwargs):
         self._drug_endpoint = '/api/v1/drug/'
@@ -117,11 +120,18 @@ class GetMedicinesFixedView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 
 
-class ExternalMedicineListView(TemplateView):
+class ExternalMedicineListView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'medicine_list.html'
-    paginate_by = 10
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and (user.role == 'ADMIN' or user.role == 'PROFISSIONAL')
+    
+    def handle_no_permission(self):
+        raise PermissionDenied("Você não tem permissão para acessar a lista de medicamentos externos.")
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._drug_endpoint = '/api/v1/drug/'
 
     def get_context_data(self, **kwargs):
