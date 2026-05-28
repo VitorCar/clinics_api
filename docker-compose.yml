@@ -1,0 +1,67 @@
+services:
+
+  clinics_api_db:
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=clinics_api
+    networks:
+      - clinics-rede-interna
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    networks:
+      - clinics-rede-interna
+
+  clinics_api_web:
+    build: .
+    command: sh -c "sleep 5 && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      - clinics_api_db
+      - redis
+    networks:
+      - clinics-rede-interna
+
+  celery_worker:
+    build: .
+    command: celery -A app worker --loglevel=info -P solo
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - clinics_api_db
+    networks:
+      - clinics-rede-interna
+
+  celery_beat:
+    build: .
+    command: celery -A app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - clinics_api_db
+    networks:
+      - clinics-rede-interna
+
+networks:
+  clinics-rede-interna:
+
+volumes:
+  postgres_data:
