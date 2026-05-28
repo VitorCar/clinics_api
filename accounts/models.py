@@ -30,7 +30,7 @@ class MyUserManager(BaseUserManager):
         if extra_fields.get('role') != 'ADMIN':
             raise ValueError('Superuser precisa ter role="ADMIN".')
         
-        return super().create_user(email, password, **extra_fields)
+        return self.create_user(email, password, **extra_fields)
     
 
 class CustomUsuario(AbstractBaseUser, PermissionsMixin):
