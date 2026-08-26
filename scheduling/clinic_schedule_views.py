@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -8,56 +8,65 @@ from .models import ClinicSchedule
 from .forms import ClinicScheduleForm
 from .serializers import ClinicScheduleSerializers, ClinicScheduleListSerializers
 from app.permissions import GlobalDefaultPermissions
+from accounts.utils import is_admin
 
 
-class ClinicScheduleListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class ClinicScheduleListView(LoginRequiredMixin, ListView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_list.html'
     context_object_name = 'clinic_schedule'
     paginate_by = 10
-    permission_required = 'scheduling.view_clinicschedule'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        
-        clinic_name = self.request.GET.get('clinic')
-        day_week = self.request.GET.get('day_week')
+        queryset = super().get_queryset().select_related('clinic')
 
-        if clinic_name:
-            queryset = queryset.filter(clinic__name__icontains=clinic_name)
+        # ADMIN: permite filtros de busca
+        if is_admin(self.request.user):
+            clinic_name = self.request.GET.get('clinic')
+            day_week = self.request.GET.get('day_week')
+            if clinic_name:
+                queryset = queryset.filter(clinic__name__icontains=clinic_name)
+            if day_week:
+                queryset = queryset.filter(days_week=day_week)
+            return queryset
 
-        if day_week:
-            queryset = queryset.filter(days_week=day_week)
-            
+        # PACIENTE/PROFISSIONAL: vê todos os horários das clínicas
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['week_days'] = ClinicSchedule.WeekDays.choices
+        context['can_manage'] = is_admin(self.request.user)
         return context
 
 
-class ClinicScheduleCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class ClinicScheduleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_create.html'
     form_class = ClinicScheduleForm
     success_url = reverse_lazy('clinic_schedule_list')
-    permission_required = 'scheduling.add_clinicschedule'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicScheduleUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ClinicScheduleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ClinicSchedule
     form_class = ClinicScheduleForm
-    template_name = 'clinic_schedule_create.html' 
+    template_name = 'clinic_schedule_create.html'
     success_url = reverse_lazy('clinic_schedule_list')
-    permission_required = 'scheduling.change_clinicschedule'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicScheduleDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class ClinicScheduleDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ClinicSchedule
     template_name = 'clinic_schedule_delete.html'
     success_url = reverse_lazy('clinic_schedule_list')
-    permission_required = 'scheduling.delete_clinicschedule'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
 @extend_schema_view(
@@ -77,7 +86,7 @@ class ClinicScheduleListCreateAPIView(ListCreateAPIView):
 
     queryset = ClinicSchedule.objects.all()
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
-    
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ClinicScheduleListSerializers

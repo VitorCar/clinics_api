@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
@@ -8,50 +8,64 @@ from .forms import ClinicHolidayForm
 from .models import ClinicHoliday
 from .serializers import ClinicHolidaySerializers, ClinicHolidayListSerializer
 from app.permissions import GlobalDefaultPermissions
+from accounts.utils import is_admin
 
 
-class ClinicHolidayListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class ClinicHolidayListView(LoginRequiredMixin, ListView):
     model = ClinicHoliday
     template_name = 'clinic_holiday_list.html'
     context_object_name = 'clinic_holidays'
     paginate_by = 10
-    permission_required = 'scheduling.view_clinicholiday'
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('date') 
-        
-        clinic_name = self.request.GET.get('clinic')
-        date_filter = self.request.GET.get('date')
+        queryset = super().get_queryset().select_related('clinic').order_by('date')
 
-        if clinic_name:
-            queryset = queryset.filter(clinic__name__icontains=clinic_name)
-        if date_filter:
-            queryset = queryset.filter(date=date_filter)
-            
+        # ADMIN: permite filtros de busca
+        if is_admin(self.request.user):
+            clinic_name = self.request.GET.get('clinic')
+            date_filter = self.request.GET.get('date')
+            if clinic_name:
+                queryset = queryset.filter(clinic__name__icontains=clinic_name)
+            if date_filter:
+                queryset = queryset.filter(date=date_filter)
+            return queryset
+
+        # PACIENTE/PROFISSIONAL: vê todos os feriados/recessos
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_manage'] = is_admin(self.request.user)
+        return context
 
-class ClinicHolidayCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+
+class ClinicHolidayCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = ClinicHoliday
     form_class = ClinicHolidayForm
     template_name = 'clinic_holiday_create.html'
     success_url = reverse_lazy('clinic_holiday_list')
-    permission_required = 'scheduling.add_clinicholiday'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicHolidayUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ClinicHolidayUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ClinicHoliday
     form_class = ClinicHolidayForm
     template_name = 'clinic_holiday_create.html'
     success_url = reverse_lazy('clinic_holiday_list')
-    permission_required = 'scheduling.change_clinicholiday'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicHolidayDeleteView(LoginRequiredMixin,PermissionRequiredMixin, DeleteView):
+class ClinicHolidayDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ClinicHoliday
     template_name = 'clinic_holiday_delete.html'
     success_url = reverse_lazy('clinic_holiday_list')
-    permission_required = 'scheduling.delete_clinicholiday'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
 @extend_schema_view(
@@ -71,7 +85,7 @@ class ClinicHolidayListCreateAPIView(ListCreateAPIView):
 
     queryset = ClinicHoliday.objects.all()
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
-    
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ClinicHolidayListSerializer
@@ -107,7 +121,7 @@ class ClinicHolidayRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = ClinicHoliday.objects.all()
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
-    
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ClinicHolidayListSerializer
