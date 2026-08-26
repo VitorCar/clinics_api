@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-people text-success me-2"></i> Gerenciamento de Usuários</h1>
-    {% if perms.accounts.add_customusuario %}
+    {% if user.is_staff or user.role == 'ADMIN' %}
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'user_create' %}" class="btn btn-sm btn-success shadow-sm">
                 <i class="bi bi-person-plus me-1"></i> Novo Usuário
@@ -80,11 +80,8 @@
                             <a href="{% url 'user_password' user.pk %}" class="btn btn-sm btn-light text-warning border me-1" title="Redefinir Senha">
                                 <i class="bi bi-key"></i>
                             </a>
-                            {% if perms.accounts.change_customusuario %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' %}
                                 <a href="{% url 'user_update' user.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
-                            {% endif %}
-
-                            {% if perms.accounts.delete_customusuario %}
                                 <a href="{% url 'user_delete' user.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
                             {% endif %}
                         </td>

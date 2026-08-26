@@ -4,8 +4,10 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2"><i class="bi bi-heart-pulse text-info me-2"></i> Profissionais de Saúde</h1>
-    {% if perms.accounts.add_healthcareprofessional %}
+    <h1 class="h2"><i class="bi bi-heart-pulse text-info me-2"></i>
+        {% if request.user.role == 'PROFISSIONAL' %}Minha Ficha de Profissional{% else %}Profissionais de Saúde{% endif %}
+    </h1>
+    {% if request.user.is_staff or request.user.role == 'ADMIN' %}
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'professional_create' %}" class="btn btn-sm btn-info text-white shadow-sm fw-bold">
                 <i class="bi bi-plus-circle me-1"></i> Cadastrar Profissional
@@ -64,11 +66,11 @@
                             {% endfor %}
                         </td>
                         <td class="text-center pe-4">
-                            {% if perms.accounts.change_healthcareprofessional %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' or request.user.role == 'PROFISSIONAL' and professional.user_id == request.user.id %}
                                 <a href="{% url 'professional_update' professional.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
                             {% endif %}
 
-                            {% if perms.accounts.delete_healthcareprofessional %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' %}
                                 <a href="{% url 'professional_delete' professional.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
                             {% endif %}
                         </td>

@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.views import View
 from django.shortcuts import get_object_or_404, render, redirect
@@ -10,28 +10,20 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import CustomUsuario
 from .forms import CustomUsuarioCreationForm, CustomUsuarioChangeForm, CustomSetPasswordForm
 from .serializers import UserSerializer, UserListSerializer
+from .utils import is_admin
 
 
-class UserListView(LoginRequiredMixin, PermissionRequiredMixin,ListView):
+class UserListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = CustomUsuario
     template_name = 'user_list.html'
     context_object_name = 'usuarios'
     paginate_by = 10
-    # Qual a permissão que o usuaro tem que ter para pode acessar esta rota 
-    permission_required = 'accounts.view_customusuario' # Seque um padrão nomedaapp.açãodapermissão_nomedomodel(minusculo)
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
     def get_queryset(self):
-        user = self.request.user
         queryset = super().get_queryset().order_by('-date_joined')
-
-        if user.role == 'PACIENTE':
-            # O paciente só vê os agendamentos onde ele é o dono
-            return queryset.filter(patient__user=user)
-        
-        elif user.role == 'PROFISSIONAL':
-            # O médico só vê os agendamentos marcados para ele
-            return queryset.filter(professional__user=user)
-        
         q = self.request.GET.get('q')
         role_filter = self.request.GET.get('role')
 
@@ -39,43 +31,42 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin,ListView):
             queryset = queryset.filter(Q(full_name__icontains=q) | Q(email__icontains=q))
         if role_filter:
             queryset = queryset.filter(role=role_filter)
-            
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['roles'] = CustomUsuario.Roles.choices
         return context
-    
 
-class UserCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+
+class UserCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = CustomUsuario
     form_class = CustomUsuarioCreationForm
     template_name = 'user_create.html'
     success_url = reverse_lazy('user_list')
-    permission_required = 'accounts.add_customusuario'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class UserUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class UserUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = CustomUsuario
     form_class = CustomUsuarioChangeForm
     template_name = 'user_create.html'
     success_url = reverse_lazy('user_list')
-    permission_required = 'accounts.change_customusuario'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = super().get_queryset()
-
-        if not user.is_superuser:
-            return queryset.filter(id=user.id)
-            
-        return queryset
+        return CustomUsuario.objects.all()
 
 
-class UserPasswordView(View):
+class UserPasswordView(LoginRequiredMixin, UserPassesTestMixin, View):
     template_name = 'user_password.html'
-    permission_required = 'accounts.change_customusuario'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
     def get(self, request, pk):
         user = get_object_or_404(CustomUsuario, pk=pk)
@@ -85,19 +76,19 @@ class UserPasswordView(View):
     def post(self, request, pk):
         user = get_object_or_404(CustomUsuario, pk=pk)
         form = CustomSetPasswordForm(user=user, data=request.POST)
-        
         if form.is_valid():
             form.save()
-            return redirect('usuario-list')
-            
+            return redirect('user_list')
         return render(request, self.template_name, {'form': form, 'usuario_alvo': user})
 
 
-class UserDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class UserDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = CustomUsuario
     template_name = 'user_delete.html'
     success_url = reverse_lazy('user_list')
-    permission_required = 'accounts.delete_customusuario'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
 @extend_schema_view(

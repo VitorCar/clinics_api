@@ -4,8 +4,10 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2"><i class="bi bi-person-hearts text-danger me-2"></i> Fichas de Pacientes</h1>
-    {% if perms.accounts.add_patients %}
+    <h1 class="h2"><i class="bi bi-person-hearts text-danger me-2"></i>
+        {% if user.role == 'PACIENTE' %}Minha Ficha de Paciente{% else %}Fichas de Pacientes{% endif %}
+    </h1>
+    {% if request.user.is_staff or request.user.role == 'ADMIN' %}
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'patient_create' %}" class="btn btn-sm btn-danger shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Nova Ficha
@@ -57,11 +59,11 @@
                         <td>{{ patient.phone }}</td>
                         <td>{{ patient.birth_date|date:"d/m/Y"|default:"-" }}</td>
                         <td class="text-center pe-4">
-                            {% if perms.accounts.change_patients %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' or request.user.role == 'PACIENTE' and patient.user_id == request.user.id %}
                                 <a href="{% url 'patient_update' patient.pk %}" class="btn btn-sm btn-light text-primary border me-1" title="Editar"><i class="bi bi-pencil"></i></a>
                             {% endif %}
 
-                            {% if perms.accounts.delete_patients %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' %}
                                 <a href="{% url 'patient_delete' patient.pk %}" class="btn btn-sm btn-light text-danger border" title="Excluir"><i class="bi bi-trash"></i></a>
                             {% endif %}
                         </td>
