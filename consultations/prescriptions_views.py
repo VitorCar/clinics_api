@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -10,16 +10,15 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from .models import Prescription
 from .forms import PrescriptionForm
 from .serializers import PrescriptionSerializers, PrescriptionListSerializers
-from accounts.utils import is_patient, is_professional
+from accounts.utils import is_patient, is_professional, is_admin
 from app.permissions import GlobalDefaultPermissions, IsOwnerOrClinic
 
 
-class PrescriptionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class PrescriptionListView(LoginRequiredMixin, ListView):
     model = Prescription
     template_name = 'prescription_list.html'
     context_object_name = 'prescriptions'
     paginate_by = 10
-    permission_required = 'consultations.view_prescription'
 
     def get_queryset(self):
         user = self.request.user
@@ -28,65 +27,96 @@ class PrescriptionListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
             'consultation__appointment__professional__user'
         ).order_by('-created_at')
 
-        if user.role == 'PACIENTE':
-        # O paciente só vê receitas vinculadas ao perfil dele
-            queryset = queryset.filter(consultation__appointment__patient__user=user)
-    
-        elif user.role == 'PROFISSIONAL':
-            # O médico só vê as receitas que ele mesmo prescreveu
-            queryset = queryset.filter(consultation__appointment__professional__user=user)
-        
-        q = self.request.GET.get('q')
+        # ADMIN: vê todos (com filtros de busca)
+        if is_admin(user):
+            q = self.request.GET.get('q')
+            if q:
+                queryset = queryset.filter(
+                    Q(medicines_name__icontains=q) |
+                    Q(consultation__appointment__patient__user__full_name__icontains=q)
+                )
+            return queryset
 
-        if q:
-            queryset = queryset.filter(
-                Q(medicines_name__icontains=q) | 
-                Q(consultation__appointment__patient__user__full_name__icontains=q)
-            )
-            
-        return queryset
+        # PACIENTE: vê apenas suas receitas
+        if is_patient(user):
+            return queryset.filter(consultation__appointment__patient=user.patient)
+
+        # PROFISSIONAL: vê receitas que ele prescreveu
+        if is_professional(user):
+            return queryset.filter(consultation__appointment__professional=user.professional)
+
+        return queryset.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_create'] = is_admin(user := self.request.user) or is_professional(user)
+        context['can_edit'] = context['can_create']
+        context['can_delete'] = is_admin(self.request.user)
+        return context
 
 
-class PrescriptionCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class PrescriptionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Prescription
     form_class = PrescriptionForm
     template_name = 'prescription_create.html'
     success_url = reverse_lazy('prescription_list')
-    permission_required = 'consultations.add_prescription'
+
+    def test_func(self):
+        user = self.request.user
+        return is_admin(user) or is_professional(user)
 
 
-class PrescriptionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class PrescriptionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Prescription
     form_class = PrescriptionForm
     template_name = 'prescription_create.html'
     success_url = reverse_lazy('prescription_list')
-    permission_required = 'consultations.change_prescription'
+
+    def test_func(self):
+        user = self.request.user
+        if is_admin(user):
+            return True
+        if is_professional(user):
+            return self.get_object().consultation.appointment.professional == user.professional
+        return False
 
     def get_queryset(self):
         user = self.request.user
-        queryset = super().get_queryset()
-
-        if user.role == 'PROFISSIONAL':
-            return queryset.filter(consultation__appointment__professional__user=user)
-        
-        if user.role == 'PACIENTE':
-            return queryset.none()
-
-        return queryset
+        qs = super().get_queryset()
+        if is_admin(user):
+            return qs
+        if is_professional(user):
+            return qs.filter(consultation__appointment__professional=user.professional)
+        return qs.none()
 
 
-class PrescriptionDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class PrescriptionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Prescription
     template_name = 'prescription_delete.html'
     success_url = reverse_lazy('prescription_list')
-    permission_required = 'consultations.delete_prescription'
+
+    def test_func(self):
+        user = self.request.user
+        if is_admin(user):
+            return True
+        if is_professional(user):
+            return self.get_object().consultation.appointment.professional == user.professional
+        return False
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = super().get_queryset()
+        if is_admin(user):
+            return qs
+        if is_professional(user):
+            return qs.filter(consultation__appointment__professional=user.professional)
+        return qs.none()
 
 
-class PrescriptionDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class PrescriptionDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Prescription
     template_name = 'prescription_detail.html'
     context_object_name = 'prescription'
-    permission_required = 'consultations.view_prescription'
 
     def get_queryset(self):
         return super().get_queryset().select_related(
@@ -94,6 +124,17 @@ class PrescriptionDetailView(LoginRequiredMixin, PermissionRequiredMixin, Detail
             'consultation__appointment__professional__user',
             'consultation__appointment__clinic'
         )
+
+    def test_func(self):
+        user = self.request.user
+        if is_admin(user):
+            return True
+        presc = self.get_object()
+        if is_patient(user):
+            return presc.consultation.appointment.patient == user.patient
+        if is_professional(user):
+            return presc.consultation.appointment.professional == user.professional
+        return False
 
 
 @extend_schema_view(
@@ -134,11 +175,8 @@ class PrescriptionListCreateAPIView(ListCreateAPIView):
 
     ordering = ["-created_at"]
 
-
     def get_queryset(self):
-
         user = self.request.user
-
         queryset = Prescription.objects.select_related(
             "consultation__appointment__patient__user",
             "consultation__appointment__professional__user",
@@ -146,22 +184,18 @@ class PrescriptionListCreateAPIView(ListCreateAPIView):
 
         # PACIENTE
         if is_patient(user):
-            return queryset.filter(
-                consultation__appointment__patient=user.patient
-            )
+            return queryset.filter(consultation__appointment__patient=user.patient)
 
         # PROFISSIONAL
         if is_professional(user):
-            return queryset.filter(
-                consultation__appointment__professional=user.professional
-            )
+            return queryset.filter(consultation__appointment__professional=user.professional)
 
         # CLÍNICA / ADMIN
-        if user.is_staff:
+        if is_admin(user):
             return queryset
 
         return Prescription.objects.none()
-    
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return PrescriptionListSerializers
@@ -196,7 +230,7 @@ class PrescriptionRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     queryset = Prescription.objects.all()
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions, IsOwnerOrClinic,)
-    
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return PrescriptionListSerializers
