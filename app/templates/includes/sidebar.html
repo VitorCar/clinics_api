@@ -3,7 +3,11 @@
         
         <div class="text-center mb-4 mt-2">
             <h4 class="text-white"><i class="bi bi-heart-pulse-fill text-danger"></i> HealthCare</h4>
-            <span class="text-muted small">Admin Dashboard</span>
+            <span class="text-muted small">
+                {% if user.role == 'ADMIN' %}Painel Administrativo
+                {% elif user.role == 'PROFISSIONAL' %}Área do Profissional
+                {% else %}Minha Área{% endif %}
+            </span>
         </div>
         
         <hr class="text-secondary mx-3">
@@ -16,68 +20,53 @@
             </li>
         </ul>
 
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-secondary text-uppercase small fw-bold">
-            <span>Pessoas</span>
-        </h6>
+        <hr class="text-white-50 my-2 mx-3">
+
+        <!-- PESSOAS -->
         <ul class="nav flex-column mb-2">
-            {% if perms.accounts.view_customusuario %}
+            {% if user.is_staff or user.role == 'ADMIN' %}
                 <li class="nav-item">
-                
                     <a class="nav-link text-white-50" href="{% url 'user_list' %}">
                         <i class="bi bi-shield-lock me-2"></i> Usuários do Sistema
                     </a>
-                    
                 </li>
             {% endif %}
 
-            {% if perms.accounts.view_patients %}
-                <li class="nav-item">
-                    
-                    <a class="nav-link text-white-50" href="{% url 'patient_list' %}">
-                        <i class="bi bi-person-hearts me-2"></i> Pacientes
-                    </a>
-                    
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'patient_list' %}">
+                    <i class="bi bi-person-hearts me-2"></i>
+                    {% if user.role == 'PACIENTE' %}Minha Ficha{% else %}Pacientes{% endif %}
+                </a>
+            </li>
 
-            {% if perms.accounts.view_healthcareprofessional %}
-                <li class="nav-item">
-                    
-                    <a class="nav-link text-white-50" href="{% url 'professional_list' %}">
-                        <i class="bi bi-person-badge me-2"></i> Profissionais
-                    </a>
-                    
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'professional_list' %}">
+                    <i class="bi bi-person-badge me-2"></i>
+                    {% if user.role == 'PROFISSIONAL' %}Minha Ficha{% else %}Profissionais{% endif %}
+                </a>
+            </li>
         </ul>
+        <hr class="text-white-50 my-2 mx-3">
 
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-secondary text-uppercase small fw-bold">
-            <span>Atendimento</span>
-        </h6>
+        <!-- CLÍNICO -->
         <ul class="nav flex-column mb-2">
-            {% if perms.scheduling.view_scheduleappointment%}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'schedule_appointments_list' %}">
-                        <i class="bi bi-calendar2-check me-2"></i> Agendamentos
-                    </a>
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'schedule_appointments_list' %}">
+                    <i class="bi bi-calendar2-check me-2"></i> Agendamentos
+                </a>
+            </li>
 
-            {% if perms.consultations.view_consultation %}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'consultation_list' %}">
-                        <i class="bi bi-journal-medical me-2"></i> Prontuários
-                    </a>
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'consultation_list' %}">
+                    <i class="bi bi-journal-medical me-2"></i> Prontuários
+                </a>
+            </li>
 
-            {% if perms.consultations.view_prescription %}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'prescription_list' %}">
-                        <i class="bi bi-capsule me-2"></i> Prescrições
-                    </a>
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'prescription_list' %}">
+                    <i class="bi bi-capsule me-2"></i> Prescrições
+                </a>
+            </li>
 
             {% if user.role == 'ADMIN' or user.role == 'PROFISSIONAL' %}   
                 <li class="nav-item">
@@ -87,29 +76,22 @@
                 </li>
             {% endif %}
         </ul>
+        <hr class="text-white-50 my-2 mx-3">
 
-        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-secondary text-uppercase small fw-bold">
-            <span>Administração</span>
-        </h6>
+        <!-- ESTRUTURA -->
         <ul class="nav flex-column mb-2">
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'clinic_list' %}">
+                    <i class="bi bi-hospital me-2"></i> Clínicas
+                </a>
+            </li>
 
-            {% if perms.clinics.view_clinic %}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'clinic_list' %}">
-                        <i class="bi bi-hospital me-2"></i> Clínicas
-                    </a>
-                </li>
-            {% endif %}
-
-            {% if perms.clinics.view_clinicprofessional %}
+            {% if user.is_staff or user.role == 'ADMIN' or user.role == 'PROFISSIONAL' %}
                 <li class="nav-item">
                     <a class="nav-link text-white-50" href="{% url 'clinic_professional_list' %}">
                         <i class="bi bi-link-45deg me-2"></i> Vínculos (Médicos)
                     </a>
                 </li>
-            {% endif %}
-
-            {% if perms.clinics.view_specialty %}
                 <li class="nav-item">
                     <a class="nav-link text-white-50" href="{% url 'specialty_list' %}">
                         <i class="bi bi-award me-2"></i> Especialidades
@@ -117,21 +99,17 @@
                 </li>
             {% endif %}
 
-            {% if perms.scheduling.view_clinicschedule %}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'clinic_schedule_list' %}">
-                        <i class="bi bi-clock-history me-2"></i> Horários Clínicas
-                    </a>
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'clinic_schedule_list' %}">
+                    <i class="bi bi-clock-history me-2"></i> Horários Clínicas
+                </a>
+            </li>
 
-            {% if perms.scheduling.view_clinicholiday %}
-                <li class="nav-item">
-                    <a class="nav-link text-white-50" href="{% url 'clinic_holiday_list' %}">
-                        <i class="bi bi-calendar-x me-2"></i> Feriados / Recessos
-                    </a>
-                </li>
-            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link text-white-50" href="{% url 'clinic_holiday_list' %}">
+                    <i class="bi bi-calendar-x me-2"></i> Feriados / Recessos
+                </a>
+            </li>
         </ul>
 
     </div>
