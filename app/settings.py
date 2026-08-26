@@ -101,7 +101,9 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if os.getenv('POSTGRES_HOST'):
+IS_DOCKER = Path('/.dockerenv').exists()
+
+if IS_DOCKER:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
