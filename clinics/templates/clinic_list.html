@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-hospital text-primary me-2"></i> Gestão de Clínicas</h1>
-    {% if perms.clinics.add_clinic %}
+    {% if request.user.is_staff or request.user.role == 'ADMIN' %}
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'clinic_create' %}" class="btn btn-sm btn-primary shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i> Nova Clínica
@@ -80,13 +80,10 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="text-center pe-4">
-                            {% if perms.clinics.change_clinic %}
+<td class="text-center pe-4">
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' %}
                                 <a href="{% url 'clinic_update' clinic.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
-                            {% endif %}
-
-                            {% if perms.clinics.delete_clinic %}
-                                <a href="{% url 'clinic_delete' clinic.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
+                                <a href="{% url 'clinic_delete' clinic.pk %}" class="btn btn-sm btn-light text-danger"><i class="bi bi-trash"></i></a>
                             {% endif %}
                         </td>
                     </tr>

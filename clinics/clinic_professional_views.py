@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
@@ -9,56 +9,74 @@ from .models import ClinicProfessional
 from .forms import ClinicProfessionalForm
 from .serializers import ClinicProfessionalSerializers, ClinicProfessionalListSerializers
 from app.permissions import GlobalDefaultPermissions
+from accounts.utils import is_admin, is_professional
 
 
-class ClinicProfessionalListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class ClinicProfessionalListView(LoginRequiredMixin, ListView):
     model = ClinicProfessional
     template_name = 'clinic_professional_list.html'
     context_object_name = 'clinic_professionals'
     paginate_by = 10
-    permission_required = 'clinics.view_clinicprofessional'
 
     def get_queryset(self):
+        user = self.request.user
         queryset = super().get_queryset().select_related('clinic', 'professional__user').order_by('-start_date')
-        
-        q = self.request.GET.get('q')
-        status = self.request.GET.get('status')
 
-        if q:
-            queryset = queryset.filter(
-                Q(clinic__name__icontains=q) | 
-                Q(professional__user__full_name__icontains=q)
-            )
-            
-        if status == 'ativos':
-            queryset = queryset.filter(active=True)
-        elif status == 'inativos':
-            queryset = queryset.filter(active=False)
-            
+        # ADMIN: vê todos (com filtros)
+        if is_admin(user):
+            q = self.request.GET.get('q')
+            status = self.request.GET.get('status')
+            if q:
+                queryset = queryset.filter(
+                    Q(clinic__name__icontains=q) |
+                    Q(professional__user__full_name__icontains=q)
+                )
+            if status == 'ativos':
+                queryset = queryset.filter(active=True)
+            elif status == 'inativos':
+                queryset = queryset.filter(active=False)
+            return queryset
+
+        # PROFISSIONAL: vê apenas os seus próprios vínculos
+        if is_professional(user):
+            return queryset.filter(professional=user.professional)
+
+        # PACIENTE: vê todos os vínculos (transparência sobre quais médicos atendem em quais clínicas)
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['can_manage'] = is_admin(self.request.user)
+        return context
 
-class ClinicProfessionalCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+
+class ClinicProfessionalCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = ClinicProfessional
     form_class = ClinicProfessionalForm
     template_name = 'clinic_professional_create.html'
     success_url = reverse_lazy('clinic_professional_list')
-    permission_required = 'clinics.add_clinicprofessional'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicProfessionalUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class ClinicProfessionalUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = ClinicProfessional
     form_class = ClinicProfessionalForm
     template_name = 'clinic_professional_create.html'
     success_url = reverse_lazy('clinic_professional_list')
-    permission_required = 'clinics.change_clinicprofessional'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
-class ClinicProfessionalDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class ClinicProfessionalDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = ClinicProfessional
     template_name = 'clinic_professional_delete.html'
     success_url = reverse_lazy('clinic_professional_list')
-    permission_required = 'clinics.delete_clinicprofessional'
+
+    def test_func(self):
+        return is_admin(self.request.user)
 
 
 @extend_schema_view(
@@ -78,7 +96,14 @@ class ClinicProfessionalListCreateAPIView(ListCreateAPIView):
 
     queryset = ClinicProfessional.objects.all()
     permission_classes = (IsAuthenticated, GlobalDefaultPermissions,)
-    
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        if is_professional(user):
+            return qs.filter(professional=user.professional)
+        return qs
+
     def get_serializer_class(self):
         if self.request.method == "GET":
             return ClinicProfessionalListSerializers
