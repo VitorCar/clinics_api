@@ -41,3 +41,6 @@ local_settings.py
 Pipfile.lock
 senha.txt
 docker_information.txt
+
+# files
+explicacao.md
