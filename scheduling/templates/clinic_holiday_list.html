@@ -5,7 +5,7 @@
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-calendar-x text-warning me-2"></i> Feriados e Recessos</h1>
-    {% if perms.scheduling.add_clinicholiday %}
+    {% if request.user.is_staff or request.user.role == 'ADMIN' %}
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'clinic_holiday_create' %}" class="btn btn-sm btn-warning text-dark shadow-sm fw-semibold">
                 <i class="bi bi-plus-circle me-1"></i> Novo Feriado
@@ -56,11 +56,8 @@
                         <td><span class="badge bg-secondary">{{ holiday.date|date:"d/m/Y" }}</span></td>
                         <td class="text-muted">{{ holiday.description|truncatechars:50 }}</td>
                         <td class="text-center pe-4">
-                            {% if perms.scheduling.change_clinicholiday %}
+                            {% if request.user.is_staff or request.user.role == 'ADMIN' %}
                                 <a href="{% url 'clinic_holiday_update' holiday.pk %}" class="btn btn-sm btn-light text-primary border me-1"><i class="bi bi-pencil"></i></a>
-                            {% endif %}
-
-                            {% if perms.scheduling.delete_clinicholiday %}
                                 <a href="{% url 'clinic_holiday_delete' holiday.pk %}" class="btn btn-sm btn-light text-danger border"><i class="bi bi-trash"></i></a>
                             {% endif %}
                         </td>

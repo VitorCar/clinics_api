@@ -6,9 +6,14 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
     <h1 class="h2"><i class="bi bi-calendar2-range text-primary me-2"></i> Detalhes do Agendamento</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        {% if perms.scheduling.change_scheduleappointment%}
+        {% if can_edit %}
             <a href="{% url 'schedule_appointments_update' appointment.pk %}" class="btn btn-sm btn-primary shadow-sm me-2">
                 <i class="bi bi-pencil me-1"></i> Editar
+            </a>
+        {% endif %}
+        {% if can_delete %}
+            <a href="{% url 'schedule_appointments_delete' appointment.pk %}" class="btn btn-sm btn-danger shadow-sm me-2">
+                <i class="bi bi-trash me-1"></i> Excluir
             </a>
         {% endif %}
         <a href="{% url 'schedule_appointments_list' %}" class="btn btn-sm btn-outline-secondary shadow-sm">
@@ -80,8 +85,10 @@
                 <div class="small"><strong>CPF:</strong> {{ appointment.patient.cpf|default:"-" }}</div>
                 <div class="small"><strong>Telefone:</strong> {{ appointment.patient.phone }}</div>
                 <hr>
-                {% if perms.accounts.change_patients %}
-                    <a href="{% url 'schedule_appointments_update' appointment.patient.pk %}" class="btn btn-sm btn-outline-danger w-100">Ver Ficha Completa</a>
+                {% if request.user.is_staff or request.user.role == 'ADMIN' or request.user.role == 'PROFISSIONAL' %}
+                    <a href="{% url 'patient_update' appointment.patient.pk %}" class="btn btn-sm btn-outline-danger w-100">Ver Ficha Completa</a>
+                {% elif request.user.role == 'PACIENTE' and appointment.patient.user_id == request.user.id %}
+                    <a href="{% url 'patient_update' appointment.patient.pk %}" class="btn btn-sm btn-outline-danger w-100">Ver Minha Ficha Completa</a>
                 {% endif %}
             </div>
         </div>
