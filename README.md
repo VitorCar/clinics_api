@@ -249,20 +249,21 @@ Para evitar que o usuário final sofra com lentidão ao esperar o disparo de e-m
   ```
 
 ---
-##Imagens
+## Imagens
 
 <img width="1070" height="787" alt="image" src="https://github.com/user-attachments/assets/cde6f833-396b-46d8-ad5b-5159a9e81317" />
 
 <img width="1896" height="750" alt="image" src="https://github.com/user-attachments/assets/b0607cf5-5b36-4fee-9da7-56afb914fedb" />
 
-###Utilizando API externa do projeto Medicines_api
+### Utilizando API externa do projeto Medicines_api
 
 <img width="1887" height="895" alt="api_clinics2" src="https://github.com/user-attachments/assets/f2fc457b-a7ba-4638-8e16-2b9a5db58016" />
 
 <img width="1557" height="907" alt="api_clinics3" src="https://github.com/user-attachments/assets/9d5101e3-a04b-4abc-b4e7-c2d780fa9b8b" />
 
+### Receitas e Prescrições
 
-
+<img width="1897" height="912" alt="image" src="https://github.com/user-attachments/assets/49a24076-6c69-4515-a155-46a9366c768e" />
 
 ---
 Desenvolvido para gerenciamento eficiente de clínicas médicas de forma escalável. 🩺
